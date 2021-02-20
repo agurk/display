@@ -24,11 +24,13 @@ func main() {
 	// Title text
 	screen.Write(dateNow(), 400, 50, false, true)
 
-	power := NewPower("/home/timothy/src/power/electricity.db")
+	power := NewPower("/home/timothy/src/display/electricity.db")
 	screen.Write("Current KWh Cost", 550, 100, true, false)
 	screen.Write(strconv.Itoa(power.CurrentCost()), 700, 110, true, true)
 
 	costGraph(screen, power)
+
+	screen.Write(time.Now().Format("2006-01-02 15:04:05"), 600, 480, true, false)
 
 	out, err := os.Create("out.bmp")
 	if err != nil {
@@ -57,6 +59,8 @@ func costGraph(screen *Screen, power *Power) {
 	screen.DrawVerticalLine(500, 400, 10)
 	screen.DrawVerticalLine(600, 400, 15)
 	screen.DrawVerticalLine(700, 400, 10)
+	screen.DrawThinWhiteLine(200, 408, 384)
+	screen.DrawThinWhiteLine(300, 408, 384)
 }
 
 func dateNow() string {

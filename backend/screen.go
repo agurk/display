@@ -97,6 +97,20 @@ func (screen *Screen) DrawHorizontalLine(height, start, length int) {
 	}
 	screen.DrawRect(image.Rect(start, height, end, height+2), image.Black)
 }
+func (screen *Screen) DrawThinWhiteLine(height, start, length int) {
+	end := start + length
+	if end > screen.Width {
+		end = screen.Width
+	}
+	height -= 1
+	if height < 0 {
+		height = 0
+	}
+	if height > screen.Height+1 {
+		height = screen.Height - 1
+	}
+	screen.DrawRect(image.Rect(start, height, end, height+1), image.White)
+}
 
 func (screen *Screen) DrawVerticalLine(vpos, start, length int) {
 	end := start + length
