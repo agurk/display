@@ -45,8 +45,8 @@ func main() {
 	x := 40
 	for _, f := range weather.Forecast() {
 		screen.Write(f.Date, x, 200, true, false)
-		screen.Write(f.TempMax, x, 215, true, false)
-		screen.Write(f.TempMin, x, 230, true, false)
+		screen.Write(f.TempMax+"°C", x, 215, true, false)
+		screen.Write(f.TempMin+"°C", x, 230, true, false)
 		screen.Write(f.Precipitation+" mm", x, 245, true, false)
 		x += 80
 	}

@@ -153,7 +153,7 @@ func (w *Weather) Forecast() []*Forecast {
 	for i := 1; i < 6; i++ {
 		f := new(Forecast)
 		date := w.weather.AggData[i].Time
-		f.Date = date[4:6] + "/" + date[6:]
+		f.Date = date[6:] + "/" + date[4:6]
 		f.TempMin = fmt.Sprintf("%.0f", w.weather.AggData[i].MinTemp)
 		f.TempMax = fmt.Sprintf("%.0f", w.weather.AggData[i].MaxTemp)
 		f.Precipitation = fmt.Sprintf("%.1f", w.weather.AggData[i].PrecipSum)
