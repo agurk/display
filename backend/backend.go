@@ -23,7 +23,7 @@ func main() {
 	screen.DrawHorizontalLine(height-20, 0, width)
 
 	// Title text
-	screen.Write(dateNow(), width/2, 60, false, true)
+	screen.Write(dateNow(), width/2, 55, false, true)
 
 	power := NewPower("/home/timothy/src/display/electricity.db")
 	screen.Write("Current KWh Cost", 550, 100, true, false)
@@ -31,14 +31,19 @@ func main() {
 
 	costGraph(screen, power)
 
-	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, 489, true, false)
-
 	weather := NewWeather("55.7034", "12.5823")
+
+	screen.Write(weather.Sunrise(), width/8, 50, false, false)
+	screen.Write(weather.Sunset(), 7*width/8, 50, false, false)
+
 	screen.Write(weather.Conditions(), 60, 140, true, true)
-	screen.Write(weather.Temp()+"° C", 200, 120, true, true)
+	screen.Write(weather.Temp()+"°C", 200, 120, true, true)
 	screen.Write(weather.Pressure()+" hPa", 320, 120, true, true)
-	screen.Write(weather.WindSpeed()+" m/s", 200, 160, true, true)
-	screen.Write(weather.WindDirection(), 350, 160, true, true)
+	screen.Write(weather.WindSpeed()+" m/s ("+weather.WindDirection()+")", 200, 160, true, true)
+	screen.Write("["+weather.WindGust()+" m/s]", 340, 160, true, true)
+
+	// when this was created
+	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, 489, true, false)
 
 	out, err := os.Create("out.bmp")
 	if err != nil {

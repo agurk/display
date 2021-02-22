@@ -95,6 +95,10 @@ func (w *Weather) WindDirection() string {
 	return w.weather.Timeserie[0].WindDir
 }
 
+func (w *Weather) WindGust() string {
+	return fmt.Sprintf("%.1f", w.weather.Timeserie[0].WindGust)
+}
+
 func (w *Weather) Conditions() string {
 	switch w.weather.Timeserie[0].Symbol {
 	case 1:
@@ -114,4 +118,12 @@ func (w *Weather) Conditions() string {
 	default:
 		return "Undefined " + strconv.Itoa(w.weather.Timeserie[0].Symbol)
 	}
+}
+
+func (w *Weather) Sunrise() string {
+	return "0" + w.weather.Sunrise[:1] + ":" + w.weather.Sunrise[1:]
+}
+
+func (w *Weather) Sunset() string {
+	return w.weather.Sunset[:2] + ":" + w.weather.Sunset[2:]
 }
