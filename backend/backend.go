@@ -19,10 +19,11 @@ func main() {
 	// Title Box
 	screen.DrawRect(image.Rect(0, 0, width, 50), image.Black)
 	// Divide screen in half
-	screen.DrawVerticalLine(400, 0, height)
+	screen.DrawVerticalLine(width/2, 0, height-20)
+	screen.DrawHorizontalLine(height-20, 0, width)
 
 	// Title text
-	screen.Write(dateNow(), 400, 50, false, true)
+	screen.Write(dateNow(), width/2, 60, false, true)
 
 	power := NewPower("/home/timothy/src/display/electricity.db")
 	screen.Write("Current KWh Cost", 550, 100, true, false)
@@ -30,7 +31,14 @@ func main() {
 
 	costGraph(screen, power)
 
-	screen.Write(time.Now().Format("2006-01-02 15:04:05"), 600, 480, true, false)
+	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, 489, true, false)
+
+	weather := NewWeather("55.7034", "12.5823")
+	screen.Write(weather.Conditions(), 60, 140, true, true)
+	screen.Write(weather.Temp()+"° C", 200, 120, true, true)
+	screen.Write(weather.Pressure()+" hPa", 320, 120, true, true)
+	screen.Write(weather.WindSpeed()+" m/s", 200, 160, true, true)
+	screen.Write(weather.WindDirection(), 350, 160, true, true)
 
 	out, err := os.Create("out.bmp")
 	if err != nil {
@@ -46,21 +54,32 @@ func main() {
 func costGraph(screen *Screen, power *Power) {
 	prices, pos := power.CostData()
 	// 48 hours shown, each bar has an 8 px slot to fit in with an 8px border
-	pixels := 400
+	x := 400
+	seperator := 2
 	for i := 0; i < 48; i++ {
-		pixels += 8
-		value := 400 - prices[i]
+		// offsets control width of bar
+		offset1 := 0
+		offset2 := 7
 		if i < pos {
-			screen.DrawRect(image.Rect(pixels+3, value, pixels+4, 400), image.Black)
-		} else {
-			screen.DrawRect(image.Rect(pixels, value, pixels+7, 400), image.Black)
+			offset1 = 3
+			offset2 = 4
 		}
+		// seperate out the two day blocks
+		if i == 24 {
+			x += 4
+		}
+		x += 8
+		value := prices[i]
+		y := 420 + seperator
+		for ; value >= 100; value -= 100 {
+			oldy := y - seperator
+			y -= 100
+			screen.DrawRect(image.Rect(x+offset1, y, x+offset2, oldy), image.Black)
+		}
+		y -= seperator
+		newy := y - value
+		screen.DrawRect(image.Rect(x+offset1, newy, x+offset2, y), image.Black)
 	}
-	screen.DrawVerticalLine(500, 400, 10)
-	screen.DrawVerticalLine(600, 400, 15)
-	screen.DrawVerticalLine(700, 400, 10)
-	screen.DrawThinWhiteLine(200, 408, 384)
-	screen.DrawThinWhiteLine(300, 408, 384)
 }
 
 func dateNow() string {
