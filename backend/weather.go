@@ -14,6 +14,14 @@ type Weather struct {
 	weather   data
 }
 
+type Forecast struct {
+	Date          string
+	TempMax       string
+	TempMin       string
+	Precipitation string
+}
+
+// Begin DMI Data Struct
 type data struct {
 	Id         string
 	City       string
@@ -25,6 +33,7 @@ type data struct {
 	Sunrise    string
 	Sunset     string
 	Timeserie  []timeserie
+	AggData    []aggdata
 }
 
 type timeserie struct {
@@ -53,6 +62,17 @@ type timeserie struct {
 	Windspeed50 float64
 	Windspeed90 float64
 }
+
+type aggdata struct {
+	Time        string
+	MinTemp     float64
+	MeanTemp    float64
+	MaxTemp     float64
+	PrecipSum   float64
+	UvRadiation float64
+}
+
+// End DMI Data Struct
 
 func NewWeather(latitude, longitude string) *Weather {
 	w := new(Weather)
@@ -126,4 +146,18 @@ func (w *Weather) Sunrise() string {
 
 func (w *Weather) Sunset() string {
 	return w.weather.Sunset[:2] + ":" + w.weather.Sunset[2:]
+}
+
+func (w *Weather) Forecast() []*Forecast {
+	var forecasts []*Forecast
+	for i := 1; i < 6; i++ {
+		f := new(Forecast)
+		date := w.weather.AggData[i].Time
+		f.Date = date[4:6] + "/" + date[6:]
+		f.TempMin = fmt.Sprintf("%.0f", w.weather.AggData[i].MinTemp)
+		f.TempMax = fmt.Sprintf("%.0f", w.weather.AggData[i].MaxTemp)
+		f.Precipitation = fmt.Sprintf("%.1f", w.weather.AggData[i].PrecipSum)
+		forecasts = append(forecasts, f)
+	}
+	return forecasts
 }

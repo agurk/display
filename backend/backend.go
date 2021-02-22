@@ -42,6 +42,15 @@ func main() {
 	screen.Write(weather.WindSpeed()+" m/s ("+weather.WindDirection()+")", 200, 160, true, true)
 	screen.Write("["+weather.WindGust()+" m/s]", 340, 160, true, true)
 
+	x := 40
+	for _, f := range weather.Forecast() {
+		screen.Write(f.Date, x, 200, true, false)
+		screen.Write(f.TempMax, x, 215, true, false)
+		screen.Write(f.TempMin, x, 230, true, false)
+		screen.Write(f.Precipitation+" mm", x, 245, true, false)
+		x += 80
+	}
+
 	// when this was created
 	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, 489, true, false)
 
