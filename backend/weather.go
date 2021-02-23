@@ -119,6 +119,17 @@ func (w *Weather) WindGust() string {
 	return fmt.Sprintf("%.1f", w.weather.Timeserie[0].WindGust)
 }
 
+func (w *Weather) Precipitation() string {
+	return fmt.Sprintf("%.0f", w.weather.Timeserie[0].Precip1)
+}
+
+func (w *Weather) PrecipitationType() string {
+	if w.weather.Timeserie[0].Precip1 < 0.5 {
+		return ""
+	}
+	return w.weather.Timeserie[0].PrecipType
+}
+
 func (w *Weather) Conditions() string {
 	switch w.weather.Timeserie[0].Symbol {
 	case 1:

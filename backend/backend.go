@@ -19,40 +19,45 @@ func main() {
 	// Title Box
 	screen.DrawRect(image.Rect(0, 0, width, 50), image.Black)
 	// Divide screen in half
-	screen.DrawVerticalLine(width/2, 0, height-20)
+	//screen.DrawVerticalLine(width/2, 0, height-20)
 	screen.DrawHorizontalLine(height-20, 0, width)
 
 	// Title text
-	screen.Write(dateNow(), width/2, 55, false, true)
+	screen.Write(dateNow(), width/2, 25, false, true)
 
 	power := NewPower("/home/timothy/src/display/electricity.db")
 	screen.Write("Current KWh Cost", 550, 100, true, false)
-	screen.Write(strconv.Itoa(power.CurrentCost()), 700, 110, true, true)
+	screen.Write(strconv.Itoa(power.CurrentCost()), 700, 100, true, true)
 
 	costGraph(screen, power)
 
 	weather := NewWeather("55.7034", "12.5823")
 
-	screen.Write(weather.Sunrise(), width/8, 50, false, false)
-	screen.Write(weather.Sunset(), 7*width/8, 50, false, false)
+	screen.Write(weather.Sunrise(), width/8, 25, false, false)
+	screen.Write(weather.Sunset(), 7*width/8, 25, false, false)
 
 	screen.Write(weather.Conditions(), 60, 140, true, true)
-	screen.Write(weather.Temp()+"°C", 200, 120, true, true)
-	screen.Write(weather.Pressure()+" hPa", 320, 120, true, true)
-	screen.Write(weather.WindSpeed()+" m/s ("+weather.WindDirection()+")", 200, 160, true, true)
-	screen.Write("["+weather.WindGust()+" m/s]", 340, 160, true, true)
 
+	screen.Write(weather.Temp()+"°C    "+weather.Pressure()+" hPa", 300, 75, true, true)
+	screen.DrawHorizontalLine(90, 200, 200)
+	screen.Write(weather.WindSpeed()+" ["+weather.WindGust()+"] m/s   ("+weather.WindDirection()+")", 300, 105, true, true)
+	screen.DrawHorizontalLine(122, 200, 200)
+	screen.Write(weather.Precipitation()+" mm "+weather.PrecipitationType(), 300, 135, true, true)
+
+	// next five days
 	x := 40
+	y := 200
 	for _, f := range weather.Forecast() {
-		screen.Write(f.Date, x, 200, true, false)
-		screen.Write(f.TempMax+"°C", x, 215, true, false)
-		screen.Write(f.TempMin+"°C", x, 230, true, false)
-		screen.Write(f.Precipitation+" mm", x, 245, true, false)
+		// 80-35-5 = 40
+		screen.DrawRect(image.Rect(x-39, y, x+39, y+20), image.Black)
+		screen.Write(f.Date, x, y+10, false, false)
+		screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, true, false)
+		screen.Write(f.Precipitation+" mm", x, y+50, true, false)
 		x += 80
 	}
 
 	// when this was created
-	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, 489, true, false)
+	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, height-10, true, false)
 
 	out, err := os.Create("out.bmp")
 	if err != nil {

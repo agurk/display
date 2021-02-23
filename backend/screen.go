@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"io/ioutil"
@@ -41,7 +42,6 @@ func (screen *Screen) LoadFont(path string) {
 func (screen *Screen) LargeFace() font.Face {
 	return truetype.NewFace(screen.Font, &truetype.Options{
 		Size:    28,
-		DPI:     72,
 		Hinting: 1,
 	})
 }
@@ -49,11 +49,11 @@ func (screen *Screen) LargeFace() font.Face {
 func (screen *Screen) Face() font.Face {
 	return truetype.NewFace(screen.Font, &truetype.Options{
 		Size:    18,
-		DPI:     72,
 		Hinting: 1,
 	})
 }
 
+// Write prints text onto the image centered around the xy point given
 func (screen *Screen) Write(text string, x, y int, black, large bool) {
 	face := screen.Face()
 	if large {
@@ -61,8 +61,11 @@ func (screen *Screen) Write(text string, x, y int, black, large bool) {
 	}
 	bounds, advance := font.BoundString(face, text)
 
+	fmt.Print("ybounds: ", bounds.Min.Y, bounds.Max.Y, "   x: ", x, " - ")
 	x = int(x - advance.Round()/2)
-	y = int(y + bounds.Min.Y.Round())
+	fmt.Print(x, "  y: ", y, " - ")
+	y = int(y - bounds.Min.Y.Round()/2)
+	fmt.Println(y)
 
 	colour := image.Black
 	if !black {
