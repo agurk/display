@@ -21,6 +21,11 @@ type Forecast struct {
 	Precipitation string
 }
 
+type Hour struct {
+	Hour        int
+	Temperature int
+}
+
 // Begin DMI Data Struct
 type data struct {
 	Id         string
@@ -159,6 +164,7 @@ func (w *Weather) Sunset() string {
 	return w.weather.Sunset[:2] + ":" + w.weather.Sunset[2:]
 }
 
+// Forecast gives five day-summary forecasts
 func (w *Weather) Forecast() []*Forecast {
 	var forecasts []*Forecast
 	for i := 1; i < 6; i++ {
@@ -171,4 +177,20 @@ func (w *Weather) Forecast() []*Forecast {
 		forecasts = append(forecasts, f)
 	}
 	return forecasts
+}
+
+// HourForecast give 48 hours worth of spot forecast
+func (w *Weather) HourForecast() []*Hour {
+	var hours []*Hour
+	for i := 0; i < 48; i++ {
+		h := new(Hour)
+		hours = append(hours, h)
+		hour, err := strconv.Atoi(w.weather.Timeserie[i].Time[8:10])
+		h.Hour = hour
+		if err != nil {
+			log.Fatal(err)
+		}
+		h.Temperature = int(w.weather.Timeserie[i].Temp)
+	}
+	return hours
 }

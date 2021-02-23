@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"io/ioutil"
@@ -61,11 +60,8 @@ func (screen *Screen) Write(text string, x, y int, black, large bool) {
 	}
 	bounds, advance := font.BoundString(face, text)
 
-	fmt.Print("ybounds: ", bounds.Min.Y, bounds.Max.Y, "   x: ", x, " - ")
 	x = int(x - advance.Round()/2)
-	fmt.Print(x, "  y: ", y, " - ")
 	y = int(y - bounds.Min.Y.Round()/2)
-	fmt.Println(y)
 
 	colour := image.Black
 	if !black {

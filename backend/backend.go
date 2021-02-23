@@ -46,7 +46,7 @@ func main() {
 
 	// next five days
 	x := 40
-	y := 200
+	y := 380
 	for _, f := range weather.Forecast() {
 		// 80-35-5 = 40
 		screen.DrawRect(image.Rect(x-39, y, x+39, y+20), image.Black)
@@ -55,6 +55,8 @@ func main() {
 		screen.Write(f.Precipitation+" mm", x, y+50, true, false)
 		x += 80
 	}
+
+	weatherGraph(screen, weather)
 
 	// when this was created
 	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, height-10, true, false)
@@ -70,12 +72,39 @@ func main() {
 	}
 }
 
+func weatherGraph(screen *Screen, weather *Weather) {
+	hours := weather.HourForecast()
+	max, min := 0, 0
+	for _, v := range hours {
+		if v.Temperature < min {
+			min = v.Temperature
+		}
+		if v.Temperature > max {
+			max = v.Temperature
+		}
+	}
+
+	x := 0
+	for i, v := range hours {
+		x += 8
+		// split out the days
+		if i > 0 && v.Hour == 0 {
+			x += 4
+			screen.DrawVerticalLine(x-6, 200, 150)
+		}
+
+		y := 350 - v.Temperature*10
+		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.Black)
+	}
+}
+
 func costGraph(screen *Screen, power *Power) {
 	prices, pos := power.CostData()
 	// 48 hours shown, each bar has an 8 px slot to fit in with an 8px border
 	x := 400
 	seperator := 2
 	for i := 0; i < 48; i++ {
+		x += 8
 		// offsets control width of bar
 		offset1 := 0
 		offset2 := 7
@@ -87,7 +116,6 @@ func costGraph(screen *Screen, power *Power) {
 		if i == 24 {
 			x += 4
 		}
-		x += 8
 		value := prices[i]
 		y := 420 + seperator
 		for ; value >= 100; value -= 100 {
