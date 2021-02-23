@@ -48,10 +48,15 @@ func main() {
 
 	// leading space lines it up better with next link
 	screen.Write(weather.Humidity()+"%", 250, 135, true, true)
+	screen.DrawHorizontalLine(152, 202, 96)
 	screen.Write("UV "+weather.UV(), 350, 135, true, true)
+	screen.DrawHorizontalLine(152, 302, 96)
 
 	screen.Write(weather.Visibility()+"m", 250, 170, true, true)
+	screen.DrawHorizontalLine(187, 202, 96)
 	screen.Write(weather.Pressure(), 350, 170, true, true)
+	screen.DrawHorizontalLine(187, 302, 96)
+	//screen.Write("hPa", 400, 173, true, false)
 
 	//screen.Write(weather.Temp()+"°C    "+weather.Pressure()+" hPa", 300, 75, true, true)
 	//screen.DrawHorizontalLine(90, 200, 200)
@@ -61,7 +66,7 @@ func main() {
 
 	// next five days
 	x := 40
-	y := 380
+	y := 390
 	for _, f := range weather.Forecast() {
 		// 80-35-5 = 40
 		screen.DrawRect(image.Rect(x-39, y, x+39, y+20), image.Black)
@@ -105,10 +110,10 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		// split out the days
 		if i > 0 && v.Hour == 0 {
 			x += 4
-			screen.DrawVerticalLine(x-6, 200, 150)
+			screen.DrawVerticalLine(x-6, 220, 150)
 		}
 
-		y := 350 - v.Temperature*10
+		y := 370 - v.Temperature*10
 		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.Black)
 	}
 }
