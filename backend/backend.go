@@ -36,7 +36,11 @@ func main() {
 	screen.Write(weather.Sunrise(), width/8, 25, false, false)
 	screen.Write(weather.Sunset(), 7*width/8, 25, false, false)
 
-	screen.Write(weather.Conditions(), 100, 100, true, true)
+	screen.Write(weather.Conditions(), 100, 80, true, true)
+	screen.DrawHorizontalLine(110, 4, 192)
+	screen.Write(weather.WindSpeed()+"m/s ("+weather.WindDirection()+")", 100, 150, true, true)
+	screen.DrawRect(image.Rect(4, 168, 196, 188), image.Black)
+	screen.Write(weather.WindGust()+"m/s gusts", 100, 178, false, false)
 
 	screen.Write(weather.Temp()+"°C", 250, 75, true, true)
 	screen.DrawRect(image.Rect(202, 90, 298, 110), image.Black)
@@ -46,7 +50,6 @@ func main() {
 	screen.DrawRect(image.Rect(302, 90, 398, 110), image.Black)
 	screen.Write(weather.DayPrecipitation()+"mm", 350, 100, false, false)
 
-	// leading space lines it up better with next link
 	screen.Write(weather.Humidity()+"%", 250, 135, true, true)
 	screen.DrawHorizontalLine(152, 202, 96)
 	screen.Write("UV "+weather.UV(), 350, 135, true, true)
@@ -57,12 +60,6 @@ func main() {
 	screen.Write(weather.Pressure(), 350, 170, true, true)
 	screen.DrawHorizontalLine(187, 302, 96)
 	//screen.Write("hPa", 400, 173, true, false)
-
-	//screen.Write(weather.Temp()+"°C    "+weather.Pressure()+" hPa", 300, 75, true, true)
-	//screen.DrawHorizontalLine(90, 200, 200)
-	//screen.Write(weather.WindSpeed()+" ["+weather.WindGust()+"] m/s   ("+weather.WindDirection()+")", 300, 105, true, true)
-	//screen.DrawHorizontalLine(122, 200, 200)
-	//screen.Write(weather.Precipitation()+" mm "+weather.PrecipitationType(), 300, 135, true, true)
 
 	// next five days
 	x := 40
@@ -104,18 +101,24 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		}
 	}
 
-	x := 0
+	x := 50
 	for i, v := range hours {
-		x += 8
+		x += 7
 		// split out the days
 		if i > 0 && v.Hour == 0 {
 			x += 4
-			screen.DrawVerticalLine(x-6, 220, 150)
+			screen.DrawVerticalLine(x-6, 220, 160)
 		}
 
 		y := 370 - v.Temperature*10
 		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.Black)
+		screen.DrawRect(image.Rect(x-3, y-1, x+3, y+1), image.Black)
+		screen.DrawRect(image.Rect(x-1, y-3, x+1, y+3), image.Black)
 	}
+	screen.DrawThinBlackLine(370, 50, 350)
+	screen.Write("0°C", 25, 370, true, false)
+	screen.DrawThinBlackLine(270, 50, 350)
+	screen.Write("10°C", 25, 270, true, false)
 }
 
 func costGraph(screen *Screen, power *Power) {
