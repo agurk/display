@@ -67,7 +67,7 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 	}
 
 	if len(prices) == 72 {
-		return prices[:48], pos
+		return prices[24:], pos
 	}
 	return prices, pos + 24
 }
