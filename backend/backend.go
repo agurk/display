@@ -18,16 +18,15 @@ func main() {
 
 	// Title Box
 	screen.DrawRect(image.Rect(0, 0, width, 50), image.Black)
-	// Divide screen in half
-	//screen.DrawVerticalLine(width/2, 0, height-20)
 	screen.DrawHorizontalLine(height-20, 0, width)
 
 	// Title text
 	screen.Write(dateNow(), width/2, 25, false, true)
 
 	power := NewPower("/home/timothy/src/display/electricity.db")
-	screen.Write("Current KWh Cost", 550, 100, true, false)
-	screen.Write(strconv.Itoa(power.CurrentCost()), 700, 100, true, true)
+	screen.DrawRect(image.Rect(404, 55, 692, 85), image.Black)
+	screen.Write("Current KWh Cost", 548, 70, false, false)
+	screen.Write(strconv.Itoa(power.CurrentCost()), 750, 70, true, true)
 
 	costGraph(screen, power)
 
