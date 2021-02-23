@@ -36,13 +36,28 @@ func main() {
 	screen.Write(weather.Sunrise(), width/8, 25, false, false)
 	screen.Write(weather.Sunset(), 7*width/8, 25, false, false)
 
-	screen.Write(weather.Conditions(), 60, 140, true, true)
+	screen.Write(weather.Conditions(), 100, 100, true, true)
 
-	screen.Write(weather.Temp()+"°C    "+weather.Pressure()+" hPa", 300, 75, true, true)
-	screen.DrawHorizontalLine(90, 200, 200)
-	screen.Write(weather.WindSpeed()+" ["+weather.WindGust()+"] m/s   ("+weather.WindDirection()+")", 300, 105, true, true)
-	screen.DrawHorizontalLine(122, 200, 200)
-	screen.Write(weather.Precipitation()+" mm "+weather.PrecipitationType(), 300, 135, true, true)
+	screen.Write(weather.Temp()+"°C", 250, 75, true, true)
+	screen.DrawRect(image.Rect(202, 90, 298, 110), image.Black)
+	screen.Write(weather.MaxTemp()+" / "+weather.MinTemp(), 250, 100, false, false)
+
+	screen.Write(weather.Precipitation()+"mm", 350, 75, true, true)
+	screen.DrawRect(image.Rect(302, 90, 398, 110), image.Black)
+	screen.Write(weather.DayPrecipitation()+"mm", 350, 100, false, false)
+
+	// leading space lines it up better with next link
+	screen.Write(weather.Humidity()+"%", 250, 135, true, true)
+	screen.Write("UV "+weather.UV(), 350, 135, true, true)
+
+	screen.Write(weather.Visibility()+"m", 250, 170, true, true)
+	screen.Write(weather.Pressure(), 350, 170, true, true)
+
+	//screen.Write(weather.Temp()+"°C    "+weather.Pressure()+" hPa", 300, 75, true, true)
+	//screen.DrawHorizontalLine(90, 200, 200)
+	//screen.Write(weather.WindSpeed()+" ["+weather.WindGust()+"] m/s   ("+weather.WindDirection()+")", 300, 105, true, true)
+	//screen.DrawHorizontalLine(122, 200, 200)
+	//screen.Write(weather.Precipitation()+" mm "+weather.PrecipitationType(), 300, 135, true, true)
 
 	// next five days
 	x := 40

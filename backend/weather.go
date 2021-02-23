@@ -108,6 +108,14 @@ func (w *Weather) Temp() string {
 	return fmt.Sprintf("%.1f", w.weather.Timeserie[0].Temp)
 }
 
+func (w *Weather) MaxTemp() string {
+	return fmt.Sprintf("%.0f", w.weather.AggData[0].MaxTemp)
+}
+
+func (w *Weather) MinTemp() string {
+	return fmt.Sprintf("%.0f", w.weather.AggData[0].MinTemp)
+}
+
 func (w *Weather) Pressure() string {
 	return fmt.Sprintf("%.0f", w.weather.Timeserie[0].Pressure)
 }
@@ -128,11 +136,27 @@ func (w *Weather) Precipitation() string {
 	return fmt.Sprintf("%.0f", w.weather.Timeserie[0].Precip1)
 }
 
+func (w *Weather) DayPrecipitation() string {
+	return fmt.Sprintf("%0.1f", w.weather.AggData[0].PrecipSum)
+}
+
 func (w *Weather) PrecipitationType() string {
 	if w.weather.Timeserie[0].Precip1 < 0.5 {
 		return ""
 	}
 	return w.weather.Timeserie[0].PrecipType
+}
+
+func (w *Weather) UV() string {
+	return fmt.Sprintf("%0.1f", w.weather.AggData[0].UvRadiation)
+}
+
+func (w *Weather) Humidity() string {
+	return fmt.Sprintf("%0.0f", w.weather.Timeserie[0].Humidity)
+}
+
+func (w *Weather) Visibility() string {
+	return fmt.Sprintf("%0.0f", w.weather.Timeserie[0].Visibility)
 }
 
 func (w *Weather) Conditions() string {
