@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"io/ioutil"
@@ -129,7 +128,6 @@ func (screen *Screen) DrawVerticalLine(vpos, start, length int) {
 
 func (screen *Screen) TwoBitImage() []byte {
 	var imag []byte
-	fmt.Println(len(screen.Image.Pix), screen.Image.Stride, screen.Image.Rect)
 	for y := 0; y < screen.Height; y++ {
 		for x := 0; x < screen.Width; x += 8 {
 			var b byte

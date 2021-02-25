@@ -215,7 +215,7 @@ func (w *Weather) Forecast() []*Forecast {
 	return forecasts
 }
 
-// HourForecast give 48 hours worth of spot forecast
+// HourForecast returns 48 hours worth of spot forecast including current conditions
 func (w *Weather) HourForecast() []*Hour {
 	var hours []*Hour
 	for i := 0; i < 48; i++ {

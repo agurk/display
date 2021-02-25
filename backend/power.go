@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"math"
 	"strconv"
@@ -73,6 +74,39 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 	}
 	return prices, pos + 24
 }
+
+// DayUseage returns the total amount of electricity consumed for the most recent
+// day that has data
+func (power *Power) DayUseage() (amount, day string) {
+	amt := 0.0
+	query := "select amount, start, end from useage where amount is not '0' order by start desc limit 24"
+	rows, err := power.Db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var a, start, end string
+		err = rows.Scan(&a, &start, &end)
+		if err != nil {
+			log.Fatal(err)
+		}
+		a2, err := strconv.ParseFloat(a, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		amt += a2
+		if day == "" {
+			day = start[:10]
+		}
+	}
+	amount = fmt.Sprintf("%0.2f", amt)
+	return
+}
+
+// WeekUseage returns the total amount of electricity consumed for the most
+// recent complete week
+//func (power *Power) WeekUseage() (amount, week string) {
+//}
 
 func fmtPrice(price, date string) int {
 	p, err := strconv.ParseFloat(price, 64)

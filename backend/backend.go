@@ -23,6 +23,7 @@ func main() {
 	// Title text
 	screen.Write(dateNow(), width/2, 25, false, true)
 
+	/********* Electricity section ***********/
 	power := NewPower("/home/timothy/src/display/electricity.db")
 	screen.DrawRect(image.Rect(404, 55, 692, 85), image.Black)
 	screen.Write("Current KWh Cost", 548, 70, false, false)
@@ -30,6 +31,11 @@ func main() {
 
 	costGraph(screen, power)
 
+	screen.DrawRect(image.Rect(440, 300, 760, 340), image.White)
+	amount, day := power.DayUseage()
+	screen.Write(day+"   "+amount+"KWh", 600, 320, true, true)
+
+	/********* Weather Section ************/
 	weather := NewWeather("55.7034", "12.5823")
 
 	screen.Write(weather.Sunrise(), width/8, 25, false, false)
