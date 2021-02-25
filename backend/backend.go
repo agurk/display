@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"golang.org/x/image/bmp"
+	//"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -82,18 +82,18 @@ func main() {
 		log.Fatal(err)
 	}
 	defer out.Close()
-	/*
-		bits := screen.TwoBitImage()
-		_, err = out.Write(bits)
-		if err != nil {
-			log.Fatal(err)
-		}
-		out.Sync()
-	*/
-	err = bmp.Encode(out, screen.Image)
+	bits := screen.TwoBitImage()
+	_, err = out.Write(bits)
 	if err != nil {
 		log.Fatal(err)
 	}
+	out.Sync()
+	/*
+		err = bmp.Encode(out, screen.Image)
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
