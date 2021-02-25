@@ -43,6 +43,7 @@ func (power *Power) CurrentCost() int {
 	return fmtPrice(price, validFrom)
 }
 
+// CostData returns the latest two days worth of hourly pricing data
 func (power *Power) CostData() (prices []int, currentPos int) {
 	yesterday := time.Now().Add(-24 * time.Hour).Format("2006-01-02 00:00:00")
 	tomorrow := time.Now().Add(48 * time.Hour).Format("2006-01-02 00:00:00")
@@ -66,6 +67,7 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 		log.Fatal(err)
 	}
 
+	// if tomorrow's data is available, remove yesterday's
 	if len(prices) == 72 {
 		return prices[24:], pos
 	}
