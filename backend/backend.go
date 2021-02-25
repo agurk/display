@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	//"golang.org/x/image/bmp"
+	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -54,7 +54,7 @@ func main() {
 	screen.Write("UV "+weather.UV(), 350, 135, true, true)
 	screen.DrawHorizontalLine(152, 302, 96)
 
-	screen.Write(weather.Visibility()+"m", 250, 170, true, true)
+	screen.Write(weather.Visibility()+weather.VisibiltyDistance(), 250, 170, true, true)
 	screen.DrawHorizontalLine(187, 202, 96)
 	screen.Write(weather.Pressure(), 350, 170, true, true)
 	screen.DrawHorizontalLine(187, 302, 96)
@@ -82,18 +82,18 @@ func main() {
 		log.Fatal(err)
 	}
 	defer out.Close()
-	bits := screen.TwoBitImage()
-	_, err = out.Write(bits)
-	if err != nil {
-		log.Fatal(err)
-	}
-	out.Sync()
 	/*
-		err = bmp.Encode(out, screen.Image)
+		bits := screen.TwoBitImage()
+		_, err = out.Write(bits)
 		if err != nil {
 			log.Fatal(err)
 		}
+		out.Sync()
 	*/
+	err = bmp.Encode(out, screen.Image)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
@@ -114,14 +114,30 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		// split out the days
 		if i > 0 && v.Hour == 0 {
 			x += 4
-			screen.DrawVerticalLine(x-6, 220, 160)
+			screen.DrawVerticalLine(x-5, 220, 160)
 		}
 
 		y := 370 - v.Temperature*10
 		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.Black)
 		screen.DrawRect(image.Rect(x-3, y-1, x+3, y+1), image.Black)
 		screen.DrawRect(image.Rect(x-1, y-3, x+1, y+3), image.Black)
+
+		switch v.Symbol {
+		case 1:
+		case 2, 102:
+			screen.DrawRect(image.Rect(x-3, 220, x-2, 228), image.Black)
+			screen.DrawRect(image.Rect(x-1, 220, x, 228), image.Black)
+			screen.DrawRect(image.Rect(x+1, 220, x+2, 228), image.Black)
+			screen.DrawRect(image.Rect(x+3, 220, x+4, 228), image.Black)
+		case 3, 103:
+			screen.DrawRect(image.Rect(x-3, 220, x+4, 228), image.Black)
+		case 45:
+			screen.DrawRect(image.Rect(x-3, 220, x+4, 222), image.Black)
+			screen.DrawRect(image.Rect(x-3, 223, x+4, 225), image.Black)
+			screen.DrawRect(image.Rect(x-3, 226, x+4, 228), image.Black)
+		}
 	}
+	screen.Write("cover", 25, 224, true, false)
 	screen.DrawThinBlackLine(370, 50, 350)
 	screen.Write("0°C", 25, 370, true, false)
 	screen.DrawThinBlackLine(270, 50, 350)

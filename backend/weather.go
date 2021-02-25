@@ -24,6 +24,7 @@ type Forecast struct {
 type Hour struct {
 	Hour        int
 	Temperature int
+	Symbol      int
 }
 
 // Begin DMI Data Struct
@@ -156,7 +157,18 @@ func (w *Weather) Humidity() string {
 }
 
 func (w *Weather) Visibility() string {
+	if w.weather.Timeserie[0].Visibility >= 1500 {
+		return fmt.Sprintf("%0.1f", w.weather.Timeserie[0].Visibility/1000)
+	}
 	return fmt.Sprintf("%0.0f", w.weather.Timeserie[0].Visibility)
+
+}
+
+func (w *Weather) VisibiltyDistance() string {
+	if w.weather.Timeserie[0].Visibility >= 1500 {
+		return "km"
+	}
+	return "m"
 }
 
 func (w *Weather) Conditions() string {
@@ -165,7 +177,7 @@ func (w *Weather) Conditions() string {
 		return "Sunny"
 	case 2, 102:
 		return "Broken Clouds"
-	case 3:
+	case 3, 103:
 		return "Cloudy"
 	case 45:
 		return "Fog"
@@ -215,6 +227,7 @@ func (w *Weather) HourForecast() []*Hour {
 			log.Fatal(err)
 		}
 		h.Temperature = int(w.weather.Timeserie[i].Temp)
+		h.Symbol = w.weather.Timeserie[i].Symbol
 	}
 	return hours
 }
