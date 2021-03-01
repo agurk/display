@@ -16,8 +16,10 @@ type Power struct {
 }
 
 type Useage struct {
-	Amount string
-	Date   string
+	Amount     string
+	Date       string
+	Cost       string
+	Efficiency string
 }
 
 func NewPower(path string) *Power {
@@ -30,23 +32,39 @@ func NewPower(path string) *Power {
 	return power
 }
 
-func (power *Power) CurrentCost() int {
-	today := time.Now()
-	lowerBound := today.Format("2006-01-02 15:00:00")
-	upperBound := today.Format("2006-01-02 15:04:05")
+// Cost returns the cost of electricity in a certain time period
+// exact will from the start of the hour until the time given
+// otherwise it'll be between exact hours
+func (power *Power) Cost(t time.Time, exact bool) float64 {
+	lowerBound := t.Format("2006-01-02 15:00:00")
+	var upperBound string
+	if exact {
+		upperBound = t.Format("2006-01-02 15:04:05")
+	} else {
+		t2 := t.Add(time.Hour)
+		upperBound = t2.Format("2006-01-02 15:00:00")
+	}
 	query := "select price, valid_from from prices where valid_from >= $1 and valid_from < $2"
 	rows, err := power.Db.Query(query, lowerBound, upperBound)
-	rows.Next()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
+	if rows.Next() {
+		var price, validFrom string
+		err = rows.Scan(&price, &validFrom)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return fmtPrice(price, validFrom)
 	}
-	var price, validFrom string
-	err = rows.Scan(&price, &validFrom)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return fmtPrice(price, validFrom)
+	fmt.Println("Missing cost for ", t)
+	return 0
+}
+
+// CurrentCost returns the electrical cost right now
+func (power *Power) CurrentCost() int {
+	return int(math.Round(power.Cost(time.Now(), true)))
 }
 
 // CostData returns the latest two days worth of hourly pricing data
@@ -65,7 +83,7 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		prices = append(prices, fmtPrice(price, validFrom))
+		prices = append(prices, int(math.Round(fmtPrice(price, validFrom))))
 	}
 
 	pos, err := strconv.Atoi(time.Now().Format("15"))
@@ -81,7 +99,7 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 }
 
 func (power *Power) powerData(limit, offset string) (usage Useage) {
-	amt := 0.0
+	amt, cost, lowestRate := 0.0, 0.0, 0.0
 	query := `select
 				amount, start, end
 			  from
@@ -95,6 +113,7 @@ func (power *Power) powerData(limit, offset string) (usage Useage) {
 			  offset
 				$2`
 	rows, err := power.Db.Query(query, limit, offset)
+	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -109,11 +128,25 @@ func (power *Power) powerData(limit, offset string) (usage Useage) {
 			log.Fatal(err)
 		}
 		amt += a2
+		t, err := time.Parse("2006-01-02T15:04:05.000Z", start)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// TODO: Actually deal with timezones
+		t = t.Add(time.Hour)
+		rate := power.Cost(t, false)
+		cost += a2 * rate
+		if rate < lowestRate || lowestRate == 0.0 {
+			lowestRate = rate
+		}
 		if usage.Date == "" {
 			usage.Date = start[:10]
 		}
 	}
 	usage.Amount = fmt.Sprintf("%0.2f", amt)
+	cheapest := amt * lowestRate
+	usage.Efficiency = fmt.Sprintf("%0.1f", cost/cheapest*100)
+	usage.Cost = fmt.Sprintf("%0.2f", cost/100)
 	return
 }
 
@@ -134,12 +167,7 @@ func (power *Power) WeekUseage() Useage {
 	return power.powerData("168", "0")
 }
 
-// WeekUseage returns the total amount of electricity consumed for the most
-// recent complete week
-//func (power *Power) WeekUseage() (amount, week string) {
-//}
-
-func fmtPrice(price, date string) int {
+func fmtPrice(price, date string) float64 {
 	p, err := strconv.ParseFloat(price, 64)
 	if err != nil {
 		log.Fatal(err)
@@ -157,5 +185,5 @@ func fmtPrice(price, date string) int {
 	default:
 		p += 162
 	}
-	return int(math.Round(p))
+	return p
 }

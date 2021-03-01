@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	//	"golang.org/x/image/bmp"
+	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -31,19 +31,25 @@ func main() {
 
 	costGraph(screen, power)
 
-	screen.DrawRect(image.Rect(420, 280, 780, 350), image.White)
-	screen.DrawRect(image.Rect(430, 290, 535, 310), image.Black) // 482
-	screen.DrawRect(image.Rect(545, 290, 655, 310), image.Black) // 600
-	screen.DrawRect(image.Rect(665, 290, 770, 310), image.Black) // 718
+	screen.DrawRect(image.Rect(420, 345, 780, 450), image.White)
+	screen.DrawRect(image.Rect(430, 350, 535, 370), image.Black) // 482
+	screen.DrawRect(image.Rect(545, 350, 655, 370), image.Black) // 600
+	screen.DrawRect(image.Rect(665, 350, 770, 370), image.Black) // 718
 	usage := power.WeekUseage()
-	screen.Write("Last Week", 482, 300, false, false)
-	screen.Write(usage.Amount+"KWh", 482, 330, true, false)
+	screen.Write("Last Week", 482, 360, false, false)
+	screen.Write(usage.Amount+"KWh", 482, 385, true, false)
+	screen.Write(usage.Cost, 482, 410, true, false)
+	screen.Write(usage.Efficiency+"%", 482, 435, true, false)
 	usage = power.PrevDayUseage()
-	screen.Write(usage.Date, 600, 300, false, false)
-	screen.Write(usage.Amount+"KWh", 600, 330, true, false)
+	screen.Write(usage.Date, 600, 360, false, false)
+	screen.Write(usage.Amount+"KWh", 600, 385, true, false)
+	screen.Write(usage.Cost, 600, 410, true, false)
+	screen.Write(usage.Efficiency+"%", 600, 435, true, false)
 	usage = power.DayUseage()
-	screen.Write(usage.Date, 718, 300, false, false)
-	screen.Write(usage.Amount+"KWh", 718, 330, true, false)
+	screen.Write(usage.Date, 718, 360, false, false)
+	screen.Write(usage.Amount+"KWh", 718, 385, true, false)
+	screen.Write(usage.Cost, 718, 410, true, false)
+	screen.Write(usage.Efficiency+"%", 718, 435, true, false)
 
 	/********* Weather Section ************/
 	weather := NewWeather("55.7034", "12.5823")
@@ -98,18 +104,18 @@ func main() {
 		log.Fatal(err)
 	}
 	defer out.Close()
-	bits := screen.OneBitImage()
-	_, err = out.Write(bits)
-	if err != nil {
-		log.Fatal(err)
-	}
 	/*
-		out.Sync()
-		err = bmp.Encode(out, screen.Image)
+		bits := screen.OneBitImage()
+		_, err = out.Write(bits)
 		if err != nil {
 			log.Fatal(err)
 		}
 	*/
+	out.Sync()
+	err = bmp.Encode(out, screen.Image)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
@@ -164,6 +170,7 @@ func costGraph(screen *Screen, power *Power) {
 	prices, pos := power.CostData()
 	// 48 hours shown, each bar has an 8 px slot to fit in with an 8px border
 	x := 400
+	yScale := 3.0 / 4.0
 	seperator := 2
 	for i := 0; i < 48; i++ {
 		x += 8
@@ -179,14 +186,14 @@ func costGraph(screen *Screen, power *Power) {
 			x += 4
 		}
 		value := prices[i]
-		y := 420 + seperator
+		y := 340 + seperator
 		for ; value >= 100; value -= 100 {
 			oldy := y - seperator
-			y -= 100
+			y -= int(100.0 * yScale)
 			screen.DrawRect(image.Rect(x+offset1, y, x+offset2, oldy), image.Black)
 		}
 		y -= seperator
-		newy := y - value
+		newy := y - int(float64(value)*yScale)
 		screen.DrawRect(image.Rect(x+offset1, newy, x+offset2, y), image.Black)
 	}
 }
