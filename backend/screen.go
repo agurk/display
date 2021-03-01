@@ -126,7 +126,8 @@ func (screen *Screen) DrawVerticalLine(vpos, start, length int) {
 	screen.DrawRect(image.Rect(vpos, start, vpos+2, end), image.Black)
 }
 
-func (screen *Screen) TwoBitImage() []byte {
+// OneBitImage returns the image encoded as one bit per pixel (for e-ink display)
+func (screen *Screen) OneBitImage() []byte {
 	var imag []byte
 	for y := 0; y < screen.Height; y++ {
 		for x := 0; x < screen.Width; x += 8 {

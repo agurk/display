@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	//"golang.org/x/image/bmp"
+	//	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -31,9 +31,19 @@ func main() {
 
 	costGraph(screen, power)
 
-	screen.DrawRect(image.Rect(440, 300, 760, 340), image.White)
-	amount, day := power.DayUseage()
-	screen.Write(day+"   "+amount+"KWh", 600, 320, true, true)
+	screen.DrawRect(image.Rect(420, 280, 780, 350), image.White)
+	screen.DrawRect(image.Rect(430, 290, 535, 310), image.Black) // 482
+	screen.DrawRect(image.Rect(545, 290, 655, 310), image.Black) // 600
+	screen.DrawRect(image.Rect(665, 290, 770, 310), image.Black) // 718
+	usage := power.WeekUseage()
+	screen.Write("Last Week", 482, 300, false, false)
+	screen.Write(usage.Amount+"KWh", 482, 330, true, false)
+	usage = power.PrevDayUseage()
+	screen.Write(usage.Date, 600, 300, false, false)
+	screen.Write(usage.Amount+"KWh", 600, 330, true, false)
+	usage = power.DayUseage()
+	screen.Write(usage.Date, 718, 300, false, false)
+	screen.Write(usage.Amount+"KWh", 718, 330, true, false)
 
 	/********* Weather Section ************/
 	weather := NewWeather("55.7034", "12.5823")
@@ -88,13 +98,13 @@ func main() {
 		log.Fatal(err)
 	}
 	defer out.Close()
-	bits := screen.TwoBitImage()
+	bits := screen.OneBitImage()
 	_, err = out.Write(bits)
 	if err != nil {
 		log.Fatal(err)
 	}
-	out.Sync()
 	/*
+		out.Sync()
 		err = bmp.Encode(out, screen.Image)
 		if err != nil {
 			log.Fatal(err)

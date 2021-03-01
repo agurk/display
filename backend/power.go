@@ -15,6 +15,11 @@ type Power struct {
 	Db *sql.DB
 }
 
+type Useage struct {
+	Amount string
+	Date   string
+}
+
 func NewPower(path string) *Power {
 	power := new(Power)
 	db, err := sql.Open("sqlite3", path)
@@ -75,12 +80,21 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 	return prices, pos + 24
 }
 
-// DayUseage returns the total amount of electricity consumed for the most recent
-// day that has data
-func (power *Power) DayUseage() (amount, day string) {
+func (power *Power) powerData(limit, offset string) (usage Useage) {
 	amt := 0.0
-	query := "select amount, start, end from useage where amount is not '0' order by start desc limit 24"
-	rows, err := power.Db.Query(query)
+	query := `select
+				amount, start, end
+			  from
+				useage
+			  where
+				amount is not '0'
+			  order by
+				start desc
+			  limit
+				$1
+			  offset
+				$2`
+	rows, err := power.Db.Query(query, limit, offset)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,12 +109,29 @@ func (power *Power) DayUseage() (amount, day string) {
 			log.Fatal(err)
 		}
 		amt += a2
-		if day == "" {
-			day = start[:10]
+		if usage.Date == "" {
+			usage.Date = start[:10]
 		}
 	}
-	amount = fmt.Sprintf("%0.2f", amt)
+	usage.Amount = fmt.Sprintf("%0.2f", amt)
 	return
+}
+
+// DayUseage returns the total amount of electricity consumed for the most recent
+// day that has data
+func (power *Power) DayUseage() Useage {
+	return power.powerData("24", "0")
+}
+
+// PrevDayUseage returns the amount of electricity consumed for the second most recent
+// day that has data
+func (power *Power) PrevDayUseage() Useage {
+	return power.powerData("24", "24")
+}
+
+// WeekUseage returns the amount of power consumed in the last 7 days
+func (power *Power) WeekUseage() Useage {
+	return power.powerData("168", "0")
 }
 
 // WeekUseage returns the total amount of electricity consumed for the most
