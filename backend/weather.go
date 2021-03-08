@@ -22,9 +22,10 @@ type Forecast struct {
 }
 
 type Hour struct {
-	Hour        int
-	Temperature int
-	Symbol      int
+	Hour          int
+	Temperature   int
+	Symbol        int
+	Precipitation int
 }
 
 // Begin DMI Data Struct
@@ -228,6 +229,12 @@ func (w *Weather) HourForecast() []*Hour {
 		}
 		h.Temperature = int(w.weather.Timeserie[i].Temp)
 		h.Symbol = w.weather.Timeserie[i].Symbol
+		// if 0.5mm mark as a full mm as float to int
+		if w.weather.Timeserie[i].Precip1 > 0.4 && w.weather.Timeserie[i].Precip1 < 1 {
+			h.Precipitation = 1
+		} else {
+			h.Precipitation = int(w.weather.Timeserie[i].Precip1)
+		}
 	}
 	return hours
 }

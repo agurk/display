@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"golang.org/x/image/bmp"
+	//"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -104,18 +104,18 @@ func main() {
 		log.Fatal(err)
 	}
 	defer out.Close()
+	bits := screen.OneBitImage()
+	_, err = out.Write(bits)
+	if err != nil {
+		log.Fatal(err)
+	}
 	/*
-		bits := screen.OneBitImage()
-		_, err = out.Write(bits)
+		out.Sync()
+		err = bmp.Encode(out, screen.Image)
 		if err != nil {
 			log.Fatal(err)
 		}
 	*/
-	out.Sync()
-	err = bmp.Encode(out, screen.Image)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
@@ -130,16 +130,42 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		}
 	}
 
+	// allow the point to go one dregree above or below the line
+	// otherwise round to the nearest 10 line
+	if min%10 == 9 {
+		min++
+	} else {
+		min -= min % 10
+	}
+
+	if max%10 == 1 {
+		max--
+	} else {
+		max += 10 - max%10
+	}
+
+	if max-min < 10 {
+		max += 10
+	}
+
+	yMax, yMin := 350, 240
+	yDegree := (yMax - yMin) / (max - min)
 	x := 50
 	for i, v := range hours {
 		x += 7
 		// split out the days
 		if i > 0 && v.Hour == 0 {
 			x += 4
-			screen.DrawVerticalLine(x-5, 220, 160)
+			screen.DrawVerticalLine(x-5, 200, 180)
 		}
 
-		y := 370 - v.Temperature*10
+		if v.Precipitation > 0 {
+			screen.DrawRect(image.Rect(x-3, 370, x+4, 370-v.Precipitation), image.Black)
+		}
+
+		y := yMax - v.Temperature*yDegree
+		// white box so visible if lots of precipitation
+		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.White)
 		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.Black)
 		screen.DrawRect(image.Rect(x-3, y-1, x+3, y+1), image.Black)
 		screen.DrawRect(image.Rect(x-1, y-3, x+1, y+3), image.Black)
@@ -147,23 +173,25 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		switch v.Symbol {
 		case 1:
 		case 2, 102:
-			screen.DrawRect(image.Rect(x-3, 220, x-2, 228), image.Black)
-			screen.DrawRect(image.Rect(x-1, 220, x, 228), image.Black)
-			screen.DrawRect(image.Rect(x+1, 220, x+2, 228), image.Black)
-			screen.DrawRect(image.Rect(x+3, 220, x+4, 228), image.Black)
+			screen.DrawRect(image.Rect(x-3, 205, x-2, 215), image.Black)
+			screen.DrawRect(image.Rect(x-1, 205, x, 215), image.Black)
+			screen.DrawRect(image.Rect(x+1, 205, x+2, 215), image.Black)
+			screen.DrawRect(image.Rect(x+3, 205, x+4, 215), image.Black)
 		case 3, 103:
-			screen.DrawRect(image.Rect(x-3, 220, x+4, 228), image.Black)
+			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
 		case 45:
-			screen.DrawRect(image.Rect(x-3, 220, x+4, 222), image.Black)
-			screen.DrawRect(image.Rect(x-3, 223, x+4, 225), image.Black)
-			screen.DrawRect(image.Rect(x-3, 226, x+4, 228), image.Black)
+			screen.DrawRect(image.Rect(x-3, 205, x+4, 207), image.Black)
+			screen.DrawRect(image.Rect(x-3, 209, x+4, 211), image.Black)
+			screen.DrawRect(image.Rect(x-3, 213, x+4, 215), image.Black)
 		}
+
 	}
-	screen.Write("cover", 25, 224, true, false)
-	screen.DrawThinBlackLine(370, 50, 350)
-	screen.Write("0°C", 25, 370, true, false)
-	screen.DrawThinBlackLine(270, 50, 350)
-	screen.Write("10°C", 25, 270, true, false)
+	screen.Write("cover", 25, 210, true, false)
+	for degrees := min; degrees <= max; degrees += 10 {
+		screen.DrawThinBlackLine(yMax-(degrees-min)*yDegree, 50, 350)
+		screen.Write(strconv.Itoa(degrees)+"°C", 25, yMax-(degrees-min)*yDegree, true, false)
+	}
+	screen.Write("precip", 25, 370, true, false)
 }
 
 func costGraph(screen *Screen, power *Power) {
