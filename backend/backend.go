@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	//"golang.org/x/image/bmp"
+	//	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -148,7 +148,7 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		max += 10
 	}
 
-	yMax, yMin := 350, 240
+	yMax, yMin := 350, 230
 	yDegree := (yMax - yMin) / (max - min)
 	x := 50
 	for i, v := range hours {
