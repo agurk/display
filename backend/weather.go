@@ -24,9 +24,20 @@ type Forecast struct {
 type Hour struct {
 	Hour          int
 	Temperature   int
-	Symbol        int
+	Sky           Cover
 	Precipitation int
 }
+
+type Cover int
+
+const (
+	Clear Cover = iota
+	Broken
+	Cloudy
+	Fog
+	RainLight
+	Rain
+)
 
 // Begin DMI Data Struct
 type data struct {
@@ -228,7 +239,23 @@ func (w *Weather) HourForecast() []*Hour {
 			log.Fatal(err)
 		}
 		h.Temperature = int(w.weather.Timeserie[i].Temp)
-		h.Symbol = w.weather.Timeserie[i].Symbol
+		switch w.weather.Timeserie[i].Symbol {
+		case 1:
+			h.Sky = Clear
+		case 2, 102:
+			h.Sky = Broken
+		case 3, 103:
+			h.Sky = Cloudy
+		case 45:
+			h.Sky = Fog
+		case 60, 160, 168:
+			h.Sky = RainLight
+		case 63, 69, 163:
+			h.Sky = Rain
+		default:
+			fmt.Println("Unknown symbol: ", w.weather.Timeserie[i].Symbol)
+		}
+		//h.Symbol = w.weather.Timeserie[i].Symbol
 		// if 0.5mm mark as a full mm as float to int
 		if w.weather.Timeserie[i].Precip1 > 0.4 && w.weather.Timeserie[i].Precip1 < 1 {
 			h.Precipitation = 1

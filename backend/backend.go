@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	//	"golang.org/x/image/bmp"
+	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -104,18 +104,19 @@ func main() {
 		log.Fatal(err)
 	}
 	defer out.Close()
-	bits := screen.OneBitImage()
-	_, err = out.Write(bits)
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	/*
-		out.Sync()
-		err = bmp.Encode(out, screen.Image)
+		bits := screen.OneBitImage()
+		_, err = out.Write(bits)
 		if err != nil {
 			log.Fatal(err)
 		}
 	*/
+	out.Sync()
+	err = bmp.Encode(out, screen.Image)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
@@ -170,19 +171,26 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		screen.DrawRect(image.Rect(x-3, y-1, x+3, y+1), image.Black)
 		screen.DrawRect(image.Rect(x-1, y-3, x+1, y+3), image.Black)
 
-		switch v.Symbol {
-		case 1:
-		case 2, 102:
+		switch v.Sky {
+		case Broken:
 			screen.DrawRect(image.Rect(x-3, 205, x-2, 215), image.Black)
 			screen.DrawRect(image.Rect(x-1, 205, x, 215), image.Black)
 			screen.DrawRect(image.Rect(x+1, 205, x+2, 215), image.Black)
 			screen.DrawRect(image.Rect(x+3, 205, x+4, 215), image.Black)
-		case 3, 103:
+		case Cloudy:
 			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
-		case 45:
+		case Fog:
 			screen.DrawRect(image.Rect(x-3, 205, x+4, 207), image.Black)
 			screen.DrawRect(image.Rect(x-3, 209, x+4, 211), image.Black)
 			screen.DrawRect(image.Rect(x-3, 213, x+4, 215), image.Black)
+		case RainLight:
+			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
+			screen.DrawRect(image.Rect(x-1, 215, x, 220), image.Black)
+		case Rain:
+			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
+			screen.DrawRect(image.Rect(x-1, 215, x, 222), image.Black)
+			screen.DrawRect(image.Rect(x+1, 215, x+2, 220), image.Black)
+			screen.DrawRect(image.Rect(x+3, 215, x+4, 218), image.Black)
 		}
 
 	}
