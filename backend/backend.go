@@ -17,7 +17,7 @@ func main() {
 	screen.LoadFont("fonts/FontsFree-Net-HelveticaNeueMedium.ttf")
 
 	// Title Box
-	screen.DrawRect(image.Rect(0, 0, width, 50), image.Black)
+	screen.DrawRect(0, 0, width, 50, image.Black)
 	screen.DrawHorizontalLine(height-20, 0, width)
 
 	// Title text
@@ -25,16 +25,16 @@ func main() {
 
 	/********* Electricity section ***********/
 	power := NewPower("/home/timothy/src/display/electricity.db")
-	screen.DrawRect(image.Rect(404, 55, 692, 85), image.Black)
+	screen.DrawRect(404, 55, 692, 85, image.Black)
 	screen.Write("Current KWh Cost", 548, 70, false, false)
 	screen.Write(strconv.Itoa(power.CurrentCost()), 750, 70, true, true)
 
 	costGraph(screen, power)
 
-	screen.DrawRect(image.Rect(420, 345, 780, 450), image.White)
-	screen.DrawRect(image.Rect(430, 350, 535, 370), image.Black) // 482
-	screen.DrawRect(image.Rect(545, 350, 655, 370), image.Black) // 600
-	screen.DrawRect(image.Rect(665, 350, 770, 370), image.Black) // 718
+	screen.DrawRect(420, 345, 780, 450, image.White)
+	screen.DrawRect(430, 350, 535, 370, image.Black) // 482
+	screen.DrawRect(545, 350, 655, 370, image.Black) // 600
+	screen.DrawRect(665, 350, 770, 370, image.Black) // 718
 	usage := power.WeekUseage()
 	screen.Write("Last Week", 482, 360, false, false)
 	screen.Write(usage.Amount+"KWh", 482, 385, true, false)
@@ -60,15 +60,15 @@ func main() {
 	screen.Write(weather.Conditions(), 100, 80, true, true)
 	screen.DrawHorizontalLine(110, 4, 192)
 	screen.Write(weather.WindSpeed()+"m/s ("+weather.WindDirection()+")", 100, 150, true, true)
-	screen.DrawRect(image.Rect(4, 168, 196, 188), image.Black)
+	screen.DrawRect(4, 168, 196, 188, image.Black)
 	screen.Write(weather.WindGust()+"m/s gusts", 100, 178, false, false)
 
 	screen.Write(weather.Temp()+"°C", 250, 75, true, true)
-	screen.DrawRect(image.Rect(202, 90, 298, 110), image.Black)
+	screen.DrawRect(202, 90, 298, 110, image.Black)
 	screen.Write(weather.MaxTemp()+" / "+weather.MinTemp()+"°C", 250, 100, false, false)
 
 	screen.Write(weather.Precipitation()+"mm", 350, 75, true, true)
-	screen.DrawRect(image.Rect(302, 90, 398, 110), image.Black)
+	screen.DrawRect(302, 90, 398, 110, image.Black)
 	screen.Write(weather.DayPrecipitation()+"mm", 350, 100, false, false)
 
 	screen.Write(weather.Humidity()+"%", 250, 135, true, true)
@@ -87,7 +87,7 @@ func main() {
 	y := 390
 	for _, f := range weather.Forecast() {
 		// 80-35-5 = 40
-		screen.DrawRect(image.Rect(x-39, y, x+39, y+20), image.Black)
+		screen.DrawRect(x-39, y, x+39, y+20, image.Black)
 		screen.Write(f.Date, x, y+10, false, false)
 		screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, true, false)
 		screen.Write(f.Precipitation+" mm", x, y+50, true, false)
@@ -105,18 +105,18 @@ func main() {
 	}
 	defer out.Close()
 
+	bits := screen.OneBitImage()
+	_, err = out.Write(bits)
+	if err != nil {
+		log.Fatal(err)
+	}
 	/*
-		bits := screen.OneBitImage()
-		_, err = out.Write(bits)
+		out.Sync()
+		err = bmp.Encode(out, screen.Image)
 		if err != nil {
 			log.Fatal(err)
 		}
 	*/
-	out.Sync()
-	err = bmp.Encode(out, screen.Image)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
@@ -161,36 +161,38 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		}
 
 		if v.Precipitation > 0 {
-			screen.DrawRect(image.Rect(x-3, 370, x+4, 370-v.Precipitation), image.Black)
+			screen.DrawRect(x-3, 370, x+4, 370-v.Precipitation, image.Black)
 		}
 
 		y := yMax - v.Temperature*yDegree
 		// white box so visible if lots of precipitation
-		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.White)
-		screen.DrawRect(image.Rect(x-2, y-2, x+2, y+2), image.Black)
-		screen.DrawRect(image.Rect(x-3, y-1, x+3, y+1), image.Black)
-		screen.DrawRect(image.Rect(x-1, y-3, x+1, y+3), image.Black)
+		screen.DrawRect(x-2, y-2, x+2, y+2, image.White)
+		screen.DrawRect(x-2, y-2, x+2, y+2, image.Black)
+		screen.DrawRect(x-3, y-1, x+3, y+1, image.Black)
+		screen.DrawRect(x-1, y-3, x+1, y+3, image.Black)
 
 		switch v.Sky {
 		case Broken:
-			screen.DrawRect(image.Rect(x-3, 205, x-2, 215), image.Black)
-			screen.DrawRect(image.Rect(x-1, 205, x, 215), image.Black)
-			screen.DrawRect(image.Rect(x+1, 205, x+2, 215), image.Black)
-			screen.DrawRect(image.Rect(x+3, 205, x+4, 215), image.Black)
+			screen.DrawRect(x-3, 205, x-2, 215, image.Black)
+			screen.DrawRect(x-1, 205, x, 215, image.Black)
+			screen.DrawRect(x+1, 205, x+2, 215, image.Black)
+			screen.DrawRect(x+3, 205, x+4, 215, image.Black)
 		case Cloudy:
-			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
+			screen.DrawRect(x-3, 205, x+4, 215, image.Black)
 		case Fog:
-			screen.DrawRect(image.Rect(x-3, 205, x+4, 207), image.Black)
-			screen.DrawRect(image.Rect(x-3, 209, x+4, 211), image.Black)
-			screen.DrawRect(image.Rect(x-3, 213, x+4, 215), image.Black)
+			screen.DrawRect(x-3, 205, x+4, 207, image.Black)
+			screen.DrawRect(x-3, 209, x+4, 211, image.Black)
+			screen.DrawRect(x-3, 213, x+4, 215, image.Black)
 		case RainLight:
-			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
-			screen.DrawRect(image.Rect(x-1, 215, x, 220), image.Black)
+			screen.DrawRect(x-3, 205, x+4, 215, image.Black)
+			screen.DrawRect(x-1, 215, x, 218, image.Black)
+			screen.DrawRect(x+1, 215, x+2, 217, image.Black)
+			screen.DrawRect(x+3, 215, x+4, 216, image.Black)
 		case Rain:
-			screen.DrawRect(image.Rect(x-3, 205, x+4, 215), image.Black)
-			screen.DrawRect(image.Rect(x-1, 215, x, 222), image.Black)
-			screen.DrawRect(image.Rect(x+1, 215, x+2, 220), image.Black)
-			screen.DrawRect(image.Rect(x+3, 215, x+4, 218), image.Black)
+			screen.DrawRect(x-3, 205, x+4, 215, image.Black)
+			screen.DrawRect(x-1, 215, x, 222, image.Black)
+			screen.DrawRect(x+1, 215, x+2, 220, image.Black)
+			screen.DrawRect(x+3, 215, x+4, 218, image.Black)
 		}
 
 	}
@@ -226,11 +228,11 @@ func costGraph(screen *Screen, power *Power) {
 		for ; value >= 100; value -= 100 {
 			oldy := y - seperator
 			y -= int(100.0 * yScale)
-			screen.DrawRect(image.Rect(x+offset1, y, x+offset2, oldy), image.Black)
+			screen.DrawRect(x+offset1, y, x+offset2, oldy, image.Black)
 		}
 		y -= seperator
 		newy := y - int(float64(value)*yScale)
-		screen.DrawRect(image.Rect(x+offset1, newy, x+offset2, y), image.Black)
+		screen.DrawRect(x+offset1, newy, x+offset2, y, image.Black)
 	}
 }
 

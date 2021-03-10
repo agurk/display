@@ -78,8 +78,8 @@ func (screen *Screen) Write(text string, x, y int, black, large bool) {
 	d.DrawString(text)
 }
 
-func (screen *Screen) DrawRect(rect image.Rectangle, colour *image.Uniform) {
-	draw.Draw(screen.Image, rect, colour, image.Point{}, draw.Src)
+func (screen *Screen) DrawRect(x1, y1, x2, y2 int, colour *image.Uniform) {
+	draw.Draw(screen.Image, image.Rect(x1, y1, x2, y2), colour, image.Point{}, draw.Src)
 }
 
 func (screen *Screen) DrawHorizontalLine(height, start, length int) {
@@ -94,7 +94,7 @@ func (screen *Screen) DrawHorizontalLine(height, start, length int) {
 	if height > screen.Height+2 {
 		height = screen.Height - 2
 	}
-	screen.DrawRect(image.Rect(start, height, end, height+2), image.Black)
+	screen.DrawRect(start, height, end, height+2, image.Black)
 }
 func (screen *Screen) DrawThinBlackLine(height, start, length int) {
 	end := start + length
@@ -108,7 +108,7 @@ func (screen *Screen) DrawThinBlackLine(height, start, length int) {
 	if height > screen.Height+1 {
 		height = screen.Height - 1
 	}
-	screen.DrawRect(image.Rect(start, height, end, height+1), image.Black)
+	screen.DrawRect(start, height, end, height+1, image.Black)
 }
 
 func (screen *Screen) DrawVerticalLine(vpos, start, length int) {
@@ -123,7 +123,7 @@ func (screen *Screen) DrawVerticalLine(vpos, start, length int) {
 	if vpos > screen.Width+2 {
 		vpos = screen.Width - 2
 	}
-	screen.DrawRect(image.Rect(vpos, start, vpos+2, end), image.Black)
+	screen.DrawRect(vpos, start, vpos+2, end, image.Black)
 }
 
 // OneBitImage returns the image encoded as one bit per pixel (for e-ink display)
