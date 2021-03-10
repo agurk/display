@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 )
@@ -260,7 +261,7 @@ func (w *Weather) HourForecast() []*Hour {
 		if w.weather.Timeserie[i].Precip1 > 0.4 && w.weather.Timeserie[i].Precip1 < 1 {
 			h.Precipitation = 1
 		} else {
-			h.Precipitation = int(w.weather.Timeserie[i].Precip1)
+			h.Precipitation = int(math.Round(w.weather.Timeserie[i].Precip1))
 		}
 	}
 	return hours

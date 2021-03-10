@@ -110,8 +110,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	out.Sync()
 	/*
-		out.Sync()
 		err = bmp.Encode(out, screen.Image)
 		if err != nil {
 			log.Fatal(err)
