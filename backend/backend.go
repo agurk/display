@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"golang.org/x/image/bmp"
+	//	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -67,9 +67,9 @@ func main() {
 	screen.DrawRect(202, 90, 298, 110, image.Black)
 	screen.Write(weather.MaxTemp()+" / "+weather.MinTemp()+"°C", 250, 100, false, false)
 
-	screen.Write(weather.Precipitation()+"mm", 350, 75, true, true)
+	screen.Write(weather.PrecipitationAmount()+"mm", 350, 75, true, true)
 	screen.DrawRect(302, 90, 398, 110, image.Black)
-	screen.Write(weather.DayPrecipitation()+"mm", 350, 100, false, false)
+	screen.Write(weather.DayPrecipitationAmount()+"mm", 350, 100, false, false)
 
 	screen.Write(weather.Humidity()+"%", 250, 135, true, true)
 	screen.DrawHorizontalLine(152, 202, 96)
@@ -90,7 +90,7 @@ func main() {
 		screen.DrawRect(x-39, y, x+39, y+20, image.Black)
 		screen.Write(f.Date, x, y+10, false, false)
 		screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, true, false)
-		screen.Write(f.Precipitation+" mm", x, y+50, true, false)
+		screen.Write(f.PrecipitationAmount+" mm", x, y+50, true, false)
 		x += 80
 	}
 
@@ -160,8 +160,8 @@ func weatherGraph(screen *Screen, weather *Weather) {
 			screen.DrawVerticalLine(x-5, 200, 180)
 		}
 
-		if v.Precipitation > 0 {
-			screen.DrawRect(x-3, 370, x+4, 370-v.Precipitation, image.Black)
+		if v.PrecipitationAmount > 0 {
+			screen.DrawRect(x-3, 375, x+4, 375-v.PrecipitationAmount*5, image.Black)
 		}
 
 		y := yMax - v.Temperature*yDegree
@@ -183,16 +183,27 @@ func weatherGraph(screen *Screen, weather *Weather) {
 			screen.DrawRect(x-3, 205, x+4, 207, image.Black)
 			screen.DrawRect(x-3, 209, x+4, 211, image.Black)
 			screen.DrawRect(x-3, 213, x+4, 215, image.Black)
-		case RainLight:
-			screen.DrawRect(x-3, 205, x+4, 215, image.Black)
-			screen.DrawRect(x-1, 215, x, 218, image.Black)
-			screen.DrawRect(x+1, 215, x+2, 217, image.Black)
-			screen.DrawRect(x+3, 215, x+4, 216, image.Black)
-		case Rain:
-			screen.DrawRect(x-3, 205, x+4, 215, image.Black)
-			screen.DrawRect(x-1, 215, x, 222, image.Black)
-			screen.DrawRect(x+1, 215, x+2, 220, image.Black)
-			screen.DrawRect(x+3, 215, x+4, 218, image.Black)
+		}
+
+		switch v.Precipitation {
+		case LightRain:
+			screen.DrawRect(x-2, 215, x-1, 218, image.Black)
+			screen.DrawRect(x, 215, x+1, 217, image.Black)
+			screen.DrawRect(x+2, 215, x+3, 216, image.Black)
+		case HeavyRain:
+			screen.DrawRect(x-2, 215, x-1, 222, image.Black)
+			screen.DrawRect(x, 215, x+1, 220, image.Black)
+			screen.DrawRect(x+2, 215, x+3, 218, image.Black)
+		case LightSleet, LightSnow:
+			screen.DrawRect(x-3, 217, x, 218, image.Black)
+			screen.DrawRect(x-2, 216, x-1, 219, image.Black)
+		case HeavySleet, HeavySnow:
+			screen.DrawRect(x-3, 217, x, 218, image.Black)
+			screen.DrawRect(x-2, 216, x-1, 219, image.Black)
+			screen.DrawRect(x+1, 218, x+4, 219, image.Black)
+			screen.DrawRect(x+2, 217, x+3, 220, image.Black)
+			screen.DrawRect(x-1, 220, x+2, 221, image.Black)
+			screen.DrawRect(x, 219, x+1, 222, image.Black)
 		}
 
 	}

@@ -16,17 +16,18 @@ type Weather struct {
 }
 
 type Forecast struct {
-	Date          string
-	TempMax       string
-	TempMin       string
-	Precipitation string
+	Date                string
+	TempMax             string
+	TempMin             string
+	PrecipitationAmount string
 }
 
 type Hour struct {
-	Hour          int
-	Temperature   int
-	Sky           Cover
-	Precipitation int
+	Hour                int
+	Temperature         int
+	Sky                 Cover
+	Precipitation       Precipitation
+	PrecipitationAmount int
 }
 
 type Cover int
@@ -36,8 +37,18 @@ const (
 	Broken
 	Cloudy
 	Fog
-	RainLight
-	Rain
+)
+
+type Precipitation int
+
+const (
+	None Precipitation = iota
+	LightRain
+	HeavyRain
+	LightSleet
+	HeavySleet
+	LightSnow
+	HeavySnow
 )
 
 // Begin DMI Data Struct
@@ -146,11 +157,11 @@ func (w *Weather) WindGust() string {
 	return fmt.Sprintf("%.1f", w.weather.Timeserie[0].WindGust)
 }
 
-func (w *Weather) Precipitation() string {
+func (w *Weather) PrecipitationAmount() string {
 	return fmt.Sprintf("%.0f", w.weather.Timeserie[0].Precip1)
 }
 
-func (w *Weather) DayPrecipitation() string {
+func (w *Weather) DayPrecipitationAmount() string {
 	return fmt.Sprintf("%0.1f", w.weather.AggData[0].PrecipSum)
 }
 
@@ -222,7 +233,7 @@ func (w *Weather) Forecast() []*Forecast {
 		f.Date = date[6:] + "/" + date[4:6]
 		f.TempMin = fmt.Sprintf("%.0f", w.weather.AggData[i].MinTemp)
 		f.TempMax = fmt.Sprintf("%.0f", w.weather.AggData[i].MaxTemp)
-		f.Precipitation = fmt.Sprintf("%.1f", w.weather.AggData[i].PrecipSum)
+		f.PrecipitationAmount = fmt.Sprintf("%.1f", w.weather.AggData[i].PrecipSum)
 		forecasts = append(forecasts, f)
 	}
 	return forecasts
@@ -241,28 +252,33 @@ func (w *Weather) HourForecast() []*Hour {
 		}
 		h.Temperature = int(w.weather.Timeserie[i].Temp)
 		switch w.weather.Timeserie[i].Symbol {
-		case 1:
+		case 1, 101:
 			h.Sky = Clear
-		case 2, 102:
+		case 2, 80, 81, 83, 84, 85, 86, 102, 180, 181, 183, 184, 185, 186:
 			h.Sky = Broken
-		case 3, 103:
+		case 3, 60, 63, 68, 69, 70, 73, 103, 160, 163, 168, 169, 170, 171:
 			h.Sky = Cloudy
 		case 45:
 			h.Sky = Fog
-		case 60, 160, 168:
-			h.Sky = RainLight
-		case 63, 69, 163:
-			h.Sky = Rain
 		default:
 			fmt.Println("Unknown symbol: ", w.weather.Timeserie[i].Symbol)
 		}
-		//h.Symbol = w.weather.Timeserie[i].Symbol
-		// if 0.5mm mark as a full mm as float to int
-		if w.weather.Timeserie[i].Precip1 > 0.4 && w.weather.Timeserie[i].Precip1 < 1 {
-			h.Precipitation = 1
-		} else {
-			h.Precipitation = int(math.Round(w.weather.Timeserie[i].Precip1))
+		switch w.weather.Timeserie[i].Symbol {
+		case 60, 80, 160, 180:
+			h.Precipitation = LightRain
+		case 63, 81, 163, 181:
+			h.Precipitation = HeavyRain
+		case 68, 83, 168, 183:
+			h.Precipitation = LightSleet
+		case 69, 84, 169, 184:
+			h.Precipitation = HeavySleet
+		case 70, 85, 170, 185:
+			h.Precipitation = LightSnow
+		case 73, 86, 173, 186:
+			h.Precipitation = HeavySnow
 		}
+
+		h.PrecipitationAmount = int(math.Round(w.weather.Timeserie[i].Precip1))
 	}
 	return hours
 }
