@@ -205,10 +205,18 @@ func (w *Weather) Conditions() string {
 		return "Cloudy"
 	case 45:
 		return "Fog"
-	case 60, 180:
+	case 60, 80, 160, 180:
 		return "Light Rain"
-	case 63, 181:
+	case 63, 81, 163, 181:
 		return "Heavy Rain"
+	case 68, 83, 168, 183:
+		return "Light Sleet"
+	case 69, 84, 169, 184:
+		return "Heavy Sleet"
+	case 70, 85, 170, 185:
+		return "Light Snow"
+	case 73, 86, 173, 186:
+		return "Heavy Snow"
 	case 101:
 		return "Clear"
 	default:
@@ -256,7 +264,7 @@ func (w *Weather) HourForecast() []*Hour {
 			h.Sky = Clear
 		case 2, 80, 81, 83, 84, 85, 86, 102, 180, 181, 183, 184, 185, 186:
 			h.Sky = Broken
-		case 3, 60, 63, 68, 69, 70, 73, 103, 160, 163, 168, 169, 170, 171:
+		case 3, 60, 63, 68, 69, 70, 73, 103, 160, 163, 168, 169, 170, 173:
 			h.Sky = Cloudy
 		case 45:
 			h.Sky = Fog
