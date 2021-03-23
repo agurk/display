@@ -142,7 +142,7 @@ func weatherGraph(screen *Screen, weather *Weather) {
 	if max%10 == 1 {
 		max--
 	} else {
-		max += 10 - max%10
+		max += (10 - max%10) % 10
 	}
 
 	if max-min < 10 {
