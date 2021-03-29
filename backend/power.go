@@ -92,8 +92,9 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 	}
 
 	// if tomorrow's data is available, remove yesterday's
-	if len(prices) == 72 {
-		return prices[24:], pos
+	if len(prices) > 48 {
+		dif := 72 - len(prices)
+		return prices[dif:], pos
 	}
 	return prices, pos + 24
 }

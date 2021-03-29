@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"os"
@@ -221,7 +222,8 @@ func costGraph(screen *Screen, power *Power) {
 	x := 400
 	yScale := 3.0 / 4.0
 	seperator := 2
-	for i := 0; i < 48; i++ {
+	// prices should be 48 hours...but daylight savings
+	for i := 0; i < len(prices); i++ {
 		x += 8
 		// offsets control width of bar
 		offset1 := 0
