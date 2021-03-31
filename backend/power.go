@@ -41,8 +41,8 @@ func (power *Power) Cost(t time.Time, exact bool) float64 {
 	if exact {
 		upperBound = t.Format("2006-01-02 15:04:05")
 	} else {
-		t2 := t.Add(time.Hour)
-		upperBound = t2.Format("2006-01-02 15:00:00")
+		// Hour is as costs are given in 1 hour slots
+		upperBound = t.Add(time.Hour).Format("2006-01-02 15:00:00")
 	}
 	query := "select price, valid_from from prices where valid_from >= $1 and valid_from < $2"
 	rows, err := power.Db.Query(query, lowerBound, upperBound)
@@ -58,7 +58,7 @@ func (power *Power) Cost(t time.Time, exact bool) float64 {
 		}
 		return fmtPrice(price, validFrom)
 	}
-	fmt.Println("Missing cost for ", t)
+	fmt.Println("Missing cost for", t)
 	return 0
 }
 
@@ -99,6 +99,46 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 	return prices, pos + 24
 }
 
+func (power *Power) mostRecentDay() time.Time {
+	query := `select
+				end
+			  from
+				useage
+			  where
+				amount is not '0'
+			  order by
+				start desc
+			  limit
+				1`
+	rows, err := power.Db.Query(query)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		var date string
+		err = rows.Scan(&date)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// iso format date in first 10 chars
+		t, err := time.Parse("2006-01-02", date[:10])
+		if err != nil {
+			log.Fatal(err)
+		}
+		loc, err := time.LoadLocation("Europe/Copenhagen")
+		if err != nil {
+			fmt.Println(err)
+		}
+		t = t.In(loc)
+		return t
+	}
+	log.Fatal("No latest date available")
+	return time.Now()
+}
+
+// todo: deal with daylight savings
 func (power *Power) powerData(limit, offset string) (usage Useage) {
 	amt, cost, lowestRate := 0.0, 0.0, 0.0
 	query := `select
@@ -133,8 +173,12 @@ func (power *Power) powerData(limit, offset string) (usage Useage) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		// TODO: Actually deal with timezones
-		t = t.Add(time.Hour)
+		// TODO: Set this as config
+		loc, err := time.LoadLocation("Europe/Copenhagen")
+		if err != nil {
+			fmt.Println(err)
+		}
+		t = t.In(loc)
 		rate := power.Cost(t, false)
 		cost += a2 * rate
 		if rate < lowestRate || lowestRate == 0.0 {
