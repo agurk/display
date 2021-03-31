@@ -127,33 +127,43 @@ func (power *Power) mostRecentDay() time.Time {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// TODO: Set this as config
 		loc, err := time.LoadLocation("Europe/Copenhagen")
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		t = t.In(loc)
+		_, offset := t.Zone()
+		t = t.Add(-1 * time.Second * time.Duration(offset))
 		return t
 	}
 	log.Fatal("No latest date available")
 	return time.Now()
 }
 
-// todo: deal with daylight savings
-func (power *Power) powerData(limit, offset string) (usage Useage) {
+func (power *Power) powerData(offset, days int) (usage Useage) {
+	latest := power.mostRecentDay()
+
+	t2 := latest.Add(time.Hour * 24)
+	t2 = t2.AddDate(0, 0, -1*offset)
+	_, t2off := t2.Zone()
+	t2 = t2.Add(-1 * time.Duration(t2off) * time.Second)
+	endOfDay := t2.Format("2006-01-02T15:00:00.000Z")
+
+	t2 = latest.AddDate(0, 0, -(offset + days - 1))
+	_, t2off = t2.Zone()
+	t2 = t2.Add(-1 * time.Duration(t2off) * time.Second)
+	startOfDay := t2.Format("2006-01-02T15:00:00.000Z")
+
 	amt, cost, lowestRate := 0.0, 0.0, 0.0
 	query := `select
 				amount, start, end
 			  from
 				useage
 			  where
-				amount is not '0'
-			  order by
-				start desc
-			  limit
-				$1
-			  offset
-				$2`
-	rows, err := power.Db.Query(query, limit, offset)
+				start >= $1
+				and end <= $2`
+	rows, err := power.Db.Query(query, startOfDay, endOfDay)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -176,7 +186,7 @@ func (power *Power) powerData(limit, offset string) (usage Useage) {
 		// TODO: Set this as config
 		loc, err := time.LoadLocation("Europe/Copenhagen")
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		t = t.In(loc)
 		rate := power.Cost(t, false)
@@ -198,18 +208,18 @@ func (power *Power) powerData(limit, offset string) (usage Useage) {
 // DayUseage returns the total amount of electricity consumed for the most recent
 // day that has data
 func (power *Power) DayUseage() Useage {
-	return power.powerData("24", "0")
+	return power.powerData(0, 1)
 }
 
 // PrevDayUseage returns the amount of electricity consumed for the second most recent
 // day that has data
 func (power *Power) PrevDayUseage() Useage {
-	return power.powerData("24", "24")
+	return power.powerData(1, 1)
 }
 
 // WeekUseage returns the amount of power consumed in the last 7 days
 func (power *Power) WeekUseage() Useage {
-	return power.powerData("168", "0")
+	return power.powerData(0, 7)
 }
 
 func fmtPrice(price, date string) float64 {
