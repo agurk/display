@@ -194,9 +194,7 @@ func (power *Power) powerData(offset, days int) (usage Useage) {
 		if rate < lowestRate || lowestRate == 0.0 {
 			lowestRate = rate
 		}
-		if usage.Date == "" {
-			usage.Date = start[:10]
-		}
+		usage.Date = start[:10]
 	}
 	usage.Amount = fmt.Sprintf("%0.2f", amt)
 	cheapest := amt * lowestRate
@@ -234,9 +232,14 @@ func fmtPrice(price, date string) float64 {
 	}
 
 	// Distribution costs
-	switch d.Hour() {
-	case 17, 18, 19:
-		p += 211.28
+	switch d.Month() {
+	case 1, 2, 3, 10, 11, 12:
+		switch d.Hour() {
+		case 17, 18, 19:
+			p += 211.28
+		default:
+			p += 162
+		}
 	default:
 		p += 162
 	}
