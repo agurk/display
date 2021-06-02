@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Weather struct {
@@ -20,6 +21,7 @@ type Forecast struct {
 	TempMax             string
 	TempMin             string
 	PrecipitationAmount string
+	Weekend             bool
 }
 
 type Hour struct {
@@ -238,6 +240,13 @@ func (w *Weather) Forecast() []*Forecast {
 	for i := 1; i < 6; i++ {
 		f := new(Forecast)
 		date := w.weather.AggData[i].Time
+		t, err := time.Parse("20060102", date)
+		if err != nil {
+			fmt.Println(err)
+		}
+		if t.Weekday() == time.Saturday || t.Weekday() == time.Sunday {
+			f.Weekend = true
+		}
 		f.Date = date[6:] + "/" + date[4:6]
 		f.TempMin = fmt.Sprintf("%.0f", w.weather.AggData[i].MinTemp)
 		f.TempMax = fmt.Sprintf("%.0f", w.weather.AggData[i].MaxTemp)

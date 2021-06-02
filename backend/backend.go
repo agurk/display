@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	//	"golang.org/x/image/bmp"
+	"golang.org/x/image/bmp"
 )
 
 func main() {
@@ -87,10 +87,16 @@ func main() {
 	y := 390
 	for _, f := range weather.Forecast() {
 		// 80-35-5 = 40
-		screen.DrawRect(x-39, y, x+39, y+20, image.Black)
-		screen.Write(f.Date, x, y+10, false, false)
-		screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, true, false)
-		screen.Write(f.PrecipitationAmount+" mm", x, y+50, true, false)
+		weekcol := true
+		if f.Weekend {
+			screen.DrawRect(x-39, y+20, x+39, y+60, image.Black)
+			weekcol = false
+		} else {
+			screen.DrawRect(x-39, y, x+39, y+20, image.Black)
+		}
+		screen.Write(f.Date, x, y+10, !weekcol, false)
+		screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, weekcol, false)
+		screen.Write(f.PrecipitationAmount+" mm", x, y+50, weekcol, false)
 		x += 80
 	}
 
@@ -105,18 +111,18 @@ func main() {
 	}
 	defer out.Close()
 
-	bits := screen.OneBitImage()
-	_, err = out.Write(bits)
-	if err != nil {
-		log.Fatal(err)
-	}
-	out.Sync()
 	/*
-		err = bmp.Encode(out, screen.Image)
+		bits := screen.OneBitImage()
+		_, err = out.Write(bits)
 		if err != nil {
 			log.Fatal(err)
 		}
+		out.Sync()
 	*/
+	err = bmp.Encode(out, screen.Image)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
