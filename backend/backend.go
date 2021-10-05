@@ -225,7 +225,14 @@ func costGraph(screen *Screen, power *Power) {
 	prices, pos := power.CostData()
 	// 48 hours shown, each bar has an 8 px slot to fit in with an 8px border
 	x := 400
-	yScale := 3.0 / 4.0
+	max := 100
+	for i := 0; i < len(prices); i++ {
+		if prices[i] > max {
+			max = prices[i]
+		}
+	}
+	// 240 is distance from 100 to 340
+	yScale := 240.0 / float64(max)
 	seperator := 2
 	// prices should be 48 hours...but daylight savings
 	for i := 0; i < len(prices); i++ {
