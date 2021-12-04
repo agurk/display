@@ -267,7 +267,7 @@ func (w *Weather) HourForecast() []*Hour {
 		if err != nil {
 			log.Fatal(err)
 		}
-		h.Temperature = int(w.weather.Timeserie[i].Temp)
+		h.Temperature = int(math.Round(w.weather.Timeserie[i].Temp))
 		switch w.weather.Timeserie[i].Symbol {
 		case 1, 101:
 			h.Sky = Clear

@@ -139,8 +139,10 @@ func weatherGraph(screen *Screen, weather *Weather) {
 
 	// allow the point to go one dregree above or below the line
 	// otherwise round to the nearest 10 line
-	if min%10 == 9 {
+	if min%10 == 9 || min%10 == -1 {
 		min++
+	} else if min < 0 {
+		min -= 10 + min%10
 	} else {
 		min -= min % 10
 	}
@@ -157,6 +159,12 @@ func weatherGraph(screen *Screen, weather *Weather) {
 
 	yMax, yMin := 350, 230
 	yDegree := (yMax - yMin) / (max - min)
+	yPivot := yMax
+	if max < 0 {
+		yPivot = yMin
+	} else if min < 0 {
+		yPivot -= yDegree * max
+	}
 	x := 50
 	for i, v := range hours {
 		x += 7
@@ -170,7 +178,7 @@ func weatherGraph(screen *Screen, weather *Weather) {
 			screen.DrawRect(x-3, 375, x+4, 375-v.PrecipitationAmount*5, image.Black)
 		}
 
-		y := yMax - v.Temperature*yDegree
+		y := yPivot - v.Temperature*yDegree
 		// white box so visible if lots of precipitation
 		screen.DrawRect(x-2, y-2, x+2, y+2, image.White)
 		screen.DrawRect(x-2, y-2, x+2, y+2, image.Black)
