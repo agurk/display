@@ -129,11 +129,11 @@ func weatherGraph(screen *Screen, weather *Weather) {
 	hours := weather.HourForecast()
 	max, min := 0, 0
 	for _, v := range hours {
-		if v.Temperature < min {
-			min = v.Temperature
+		if (v.Temperature / 10) < min {
+			min = v.Temperature / 10
 		}
 		if v.Temperature > max {
-			max = v.Temperature
+			max = v.Temperature / 10
 		}
 	}
 
@@ -178,7 +178,7 @@ func weatherGraph(screen *Screen, weather *Weather) {
 			screen.DrawRect(x-3, 375, x+4, 375-v.PrecipitationAmount*5, image.Black)
 		}
 
-		y := yPivot - v.Temperature*yDegree
+		y := yPivot - (v.Temperature*yDegree)/10
 		// white box so visible if lots of precipitation
 		screen.DrawRect(x-2, y-2, x+2, y+2, image.White)
 		screen.DrawRect(x-2, y-2, x+2, y+2, image.Black)

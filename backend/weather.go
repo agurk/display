@@ -25,7 +25,8 @@ type Forecast struct {
 }
 
 type Hour struct {
-	Hour                int
+	Hour int
+	// Temperature is 10x degrees C
 	Temperature         int
 	Sky                 Cover
 	Precipitation       Precipitation
@@ -267,7 +268,7 @@ func (w *Weather) HourForecast() []*Hour {
 		if err != nil {
 			log.Fatal(err)
 		}
-		h.Temperature = int(math.Round(w.weather.Timeserie[i].Temp))
+		h.Temperature = int(math.Round(w.weather.Timeserie[i].Temp * 10))
 		switch w.weather.Timeserie[i].Symbol {
 		case 1, 101:
 			h.Sky = Clear
