@@ -206,7 +206,7 @@ func (w *Weather) Conditions() string {
 		return "Broken Clouds"
 	case 3, 103:
 		return "Cloudy"
-	case 45:
+	case 45, 145:
 		return "Fog"
 	case 60, 80, 160, 180:
 		return "Light Rain"
