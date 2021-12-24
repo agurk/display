@@ -160,7 +160,7 @@ func weatherGraph(screen *Screen, weather *Weather) {
 	yMax, yMin := 350, 230
 	yDegree := (yMax - yMin) / (max - min)
 	yPivot := yMax
-	if max < 0 {
+	if max <= 0 {
 		yPivot = yMin
 	} else if min < 0 {
 		yPivot -= yDegree * max
