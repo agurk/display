@@ -132,7 +132,7 @@ func weatherGraph(screen *Screen, weather *Weather) {
 		if (v.Temperature / 10) < min {
 			min = v.Temperature / 10
 		}
-		if v.Temperature > max {
+		if (v.Temperature / 10) > max {
 			max = v.Temperature / 10
 		}
 	}
