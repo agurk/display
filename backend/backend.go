@@ -105,24 +105,27 @@ func main() {
 	// when this was created
 	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, height-10, true, false)
 
-	out, err := os.Create("out.bmp")
+	bmp8, err := os.Create("full.bmp")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer out.Close()
+	defer bmp8.Close()
+	err = bmp.Encode(bmp8, screen.Image)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	/*
-		bits := screen.OneBitImage()
-		_, err = out.Write(bits)
-		if err != nil {
-			log.Fatal(err)
-		}
-		out.Sync()
-	*/
-	err = bmp.Encode(out, screen.Image)
+	oneBmp, err := os.Create("out.bmp")
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oneBmp.Close()
+	bits := screen.OneBitImage()
+	_, err = oneBmp.Write(bits)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oneBmp.Sync()
 }
 
 func weatherGraph(screen *Screen, weather *Weather) {
@@ -223,6 +226,9 @@ func weatherGraph(screen *Screen, weather *Weather) {
 	}
 	screen.Write("cover", 25, 210, true, false)
 	for degrees := min; degrees <= max; degrees += 10 {
+		if degrees == 0 {
+			screen.DrawThinBlackLine(yMax-(degrees-min)*yDegree+1, 50, 350)
+		}
 		screen.DrawThinBlackLine(yMax-(degrees-min)*yDegree, 50, 350)
 		screen.Write(strconv.Itoa(degrees)+"°C", 25, yMax-(degrees-min)*yDegree, true, false)
 	}
