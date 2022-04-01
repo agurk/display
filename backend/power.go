@@ -236,10 +236,12 @@ func fmtPrice(price, date string) float64 {
 	case 1, 2, 3, 10, 11, 12:
 		switch d.Hour() {
 		case 17, 18, 19:
-			p += 205.37
+			p += 164.07
+			//p += 205.37
 			//p += 211.28
 		default:
-			p += 156.07
+			p += 164.07
+			//p += 156.07
 			//p += 162
 		}
 	default:
