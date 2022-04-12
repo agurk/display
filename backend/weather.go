@@ -279,7 +279,7 @@ func (w *Weather) HourForecast() []*Hour {
 		case 45, 145:
 			h.Sky = Fog
 		default:
-			fmt.Println("Unknown symbol: ", w.weather.Timeserie[i].Symbol)
+			fmt.Println("Unknown symbol: ", w.weather.Timeserie[i].Symbol, "at hour", i)
 		}
 		switch w.weather.Timeserie[i].Symbol {
 		case 60, 80, 160, 180:

@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"time"
@@ -132,11 +133,12 @@ func weatherGraph(screen *Screen, weather *Weather) {
 	hours := weather.HourForecast()
 	max, min := 0, 0
 	for _, v := range hours {
-		if (v.Temperature / 10) < min {
-			min = v.Temperature / 10
+		intTemp := int(math.Round(float64(v.Temperature) / 10.0))
+		if intTemp < min {
+			min = intTemp
 		}
-		if (v.Temperature / 10) > max {
-			max = v.Temperature / 10
+		if intTemp > max {
+			max = intTemp
 		}
 	}
 
