@@ -36,15 +36,15 @@ func NewPower(path string) *Power {
 // exact will from the start of the hour until the time given
 // otherwise it'll be between exact hours
 func (power *Power) Cost(t time.Time, exact bool) float64 {
-	lowerBound := t.Format("2006-01-02 15:00:00")
+	lowerBound := t.Format("2006-01-02T15:00:00")
 	var upperBound string
 	if exact {
-		upperBound = t.Format("2006-01-02 15:04:05")
+		upperBound = t.Format("2006-01-02T15:04:05")
 	} else {
 		// Hour is as costs are given in 1 hour slots
-		upperBound = t.Add(time.Hour).Format("2006-01-02 15:00:00")
+		upperBound = t.Add(time.Hour).Format("2006-01-02T15:00:00")
 	}
-	query := "select price, valid_from from prices where valid_from >= $1 and valid_from < $2"
+	query := "select price, end from prices where end >= $1 and end < $2"
 	rows, err := power.Db.Query(query, lowerBound, upperBound)
 	if err != nil {
 		log.Fatal(err)
@@ -64,14 +64,14 @@ func (power *Power) Cost(t time.Time, exact bool) float64 {
 
 // CurrentCost returns the electrical cost right now
 func (power *Power) CurrentCost() int {
-	return int(math.Round(power.Cost(time.Now(), true)))
+	return int(math.Round(power.Cost(time.Now(), false)))
 }
 
 // CostData returns the latest two days worth of hourly pricing data
 func (power *Power) CostData() (prices []int, currentPos int) {
 	yesterday := time.Now().Add(-24 * time.Hour).Format("2006-01-02 00:00:00")
 	tomorrow := time.Now().Add(48 * time.Hour).Format("2006-01-02 00:00:00")
-	query := "select price, valid_from from prices where valid_from >= $1 and valid_from < $2"
+	query := "select price, start from prices where end >= $1 and end < $2"
 	rows, err := power.Db.Query(query, yesterday, tomorrow)
 	defer rows.Close()
 	if err != nil {
@@ -226,26 +226,5 @@ func fmtPrice(price, date string) float64 {
 		log.Fatal(err)
 	}
 
-	d, err := time.Parse("2006-01-02 15:04:05", date)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Distribution costs
-	switch d.Month() {
-	case 1, 2, 3, 10, 11, 12:
-		switch d.Hour() {
-		case 17, 18, 19:
-			p += 164.07
-			//p += 205.37
-			//p += 211.28
-		default:
-			p += 164.07
-			//p += 156.07
-			//p += 162
-		}
-	default:
-		p += 162
-	}
-	return p
+	return p * 100
 }
