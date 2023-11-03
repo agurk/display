@@ -69,9 +69,9 @@ func (power *Power) CurrentCost() int {
 
 // CostData returns the latest two days worth of hourly pricing data
 func (power *Power) CostData() (prices []int, currentPos int) {
-	yesterday := time.Now().Add(-24 * time.Hour).Format("2006-01-02T00:00:00")
-	tomorrow := time.Now().Add(48 * time.Hour).Format("2006-01-02T00:00:00")
-	query := "select price, start from prices where end >= $1 and end < $2"
+	yesterday := time.Now().Add(-24*time.Hour).Format("2006-01-02") + "T" + getQueryHour() + ":00:00+0200"
+	tomorrow := time.Now().Add(48*time.Hour).Format("2006-01-02T00:00:00") + "+0200"
+	query := "select price, start from prices where end > $1 and end < $2"
 	rows, err := power.Db.Query(query, yesterday, tomorrow)
 	defer rows.Close()
 	if err != nil {
@@ -91,12 +91,21 @@ func (power *Power) CostData() (prices []int, currentPos int) {
 		log.Fatal(err)
 	}
 
-    // if tomorrow's data is available, remove yesterday's
-    if len(prices) > 48 {
-        dif := len(prices) - 48
-        return prices[dif:], pos 
-    } 
+	// if tomorrow's data is available, remove yesterday's
+	if len(prices) > 48 {
+		dif := len(prices) - 48
+		return prices[dif:], pos
+	}
 	return prices, pos + 24
+}
+
+// getQueryHour exists as the incoming data is always in UTC+0200
+func getQueryHour() string {
+	_, offset := time.Now().Zone()
+	if offset == 2*60*60 {
+		return "00"
+	}
+	return "01"
 }
 
 func (power *Power) mostRecentDay() time.Time {
