@@ -113,7 +113,8 @@ func NewWeather(latitude, longitude string) *Weather {
 	w.Latitude = latitude
 	err := w.LoadWeather()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+        return nil
 	}
 	return w
 }
@@ -238,7 +239,11 @@ func (w *Weather) Sunset() string {
 // Forecast gives five day-summary forecasts
 func (w *Weather) Forecast() []*Forecast {
 	var forecasts []*Forecast
-	for i := 1; i < 6; i++ {
+    max := 6
+    if len(w.weather.AggData) < max {
+        max = len(w.weather.AggData)
+    }
+	for i := 1; i < max ; i++ {
 		f := new(Forecast)
 		date := w.weather.AggData[i].Time
 		t, err := time.Parse("20060102", date)

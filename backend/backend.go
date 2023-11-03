@@ -54,54 +54,57 @@ func main() {
 
 	/********* Weather Section ************/
 	weather := NewWeather("55.7034", "12.5823")
+    if weather != nil {
 
-	screen.Write(weather.Sunrise(), width/8, 25, false, false)
-	screen.Write(weather.Sunset(), 7*width/8, 25, false, false)
+        screen.Write(weather.Sunrise(), width/8, 25, false, false)
+        screen.Write(weather.Sunset(), 7*width/8, 25, false, false)
 
-	screen.Write(weather.Conditions(), 100, 80, true, true)
-	screen.DrawHorizontalLine(110, 4, 192)
-	screen.Write(weather.WindSpeed()+"m/s ("+weather.WindDirection()+")", 100, 150, true, true)
-	screen.DrawRect(4, 168, 196, 188, image.Black)
-	screen.Write(weather.WindGust()+"m/s gusts", 100, 178, false, false)
+        screen.Write(weather.Conditions(), 100, 80, true, true)
+        screen.DrawHorizontalLine(110, 4, 192)
+        screen.Write(weather.WindSpeed()+"m/s ("+weather.WindDirection()+")", 100, 150, true, true)
+        screen.DrawRect(4, 168, 196, 188, image.Black)
+        screen.Write(weather.WindGust()+"m/s gusts", 100, 178, false, false)
 
-	screen.Write(weather.Temp()+"°C", 250, 75, true, true)
-	screen.DrawRect(202, 90, 298, 110, image.Black)
-	screen.Write(weather.MaxTemp()+" / "+weather.MinTemp()+"°C", 250, 100, false, false)
+        screen.Write(weather.Temp()+"°C", 250, 75, true, true)
+        screen.DrawRect(202, 90, 298, 110, image.Black)
+        screen.Write(weather.MaxTemp()+" / "+weather.MinTemp()+"°C", 250, 100, false, false)
 
-	screen.Write(weather.PrecipitationAmount()+"mm", 350, 75, true, true)
-	screen.DrawRect(302, 90, 398, 110, image.Black)
-	screen.Write(weather.DayPrecipitationAmount()+"mm", 350, 100, false, false)
+        screen.Write(weather.PrecipitationAmount()+"mm", 350, 75, true, true)
+        screen.DrawRect(302, 90, 398, 110, image.Black)
+        screen.Write(weather.DayPrecipitationAmount()+"mm", 350, 100, false, false)
 
-	screen.Write(weather.Humidity()+"%", 250, 135, true, true)
-	screen.DrawHorizontalLine(152, 202, 96)
-	screen.Write("UV "+weather.UV(), 350, 135, true, true)
-	screen.DrawHorizontalLine(152, 302, 96)
+        screen.Write(weather.Humidity()+"%", 250, 135, true, true)
+        screen.DrawHorizontalLine(152, 202, 96)
+        screen.Write("UV "+weather.UV(), 350, 135, true, true)
+        screen.DrawHorizontalLine(152, 302, 96)
 
-	screen.Write(weather.Visibility()+weather.VisibiltyDistance(), 250, 170, true, true)
-	screen.DrawHorizontalLine(187, 202, 96)
-	screen.Write(weather.Pressure(), 350, 170, true, true)
-	screen.DrawHorizontalLine(187, 302, 96)
-	//screen.Write("hPa", 400, 173, true, false)
+        screen.Write(weather.Visibility()+weather.VisibiltyDistance(), 250, 170, true, true)
+        screen.DrawHorizontalLine(187, 202, 96)
+        screen.Write(weather.Pressure(), 350, 170, true, true)
+        screen.DrawHorizontalLine(187, 302, 96)
+        //screen.Write("hPa", 400, 173, true, false)
 
-	// next five days
-	x := 40
-	y := 390
-	for _, f := range weather.Forecast() {
-		// 80-35-5 = 40
-		weekcol := true
-		if f.Weekend {
-			screen.DrawRect(x-39, y+20, x+39, y+60, image.Black)
-			weekcol = false
-		} else {
-			screen.DrawRect(x-39, y, x+39, y+20, image.Black)
-		}
-		screen.Write(f.Date, x, y+10, !weekcol, false)
-		screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, weekcol, false)
-		screen.Write(f.PrecipitationAmount+" mm", x, y+50, weekcol, false)
-		x += 80
-	}
+        // next five days
+        x := 40
+        y := 390
+        for _, f := range weather.Forecast() {
+            weekcol := true
+            if f.Weekend {
+                screen.DrawRect(x-39, y+20, x+39, y+60, image.Black)
+                weekcol = false
+            } else {
+                screen.DrawRect(x-39, y, x+39, y+20, image.Black)
+            }
+            screen.Write(f.Date, x, y+10, !weekcol, false)
+            screen.Write(f.TempMax+" / "+f.TempMin+"°C", x, y+30, weekcol, false)
+            screen.Write(f.PrecipitationAmount+" mm", x, y+50, weekcol, false)
+            x += 80
+        }
 
-	weatherGraph(screen, weather)
+	    weatherGraph(screen, weather)
+    } else {
+        screen.Write("Cannot Contact Weather Service", width/4, height/2, true, false)
+    }
 
 	// when this was created
 	screen.Write(time.Now().Format("2006-01-02 15:04:05"), width/2, height-10, true, false)
